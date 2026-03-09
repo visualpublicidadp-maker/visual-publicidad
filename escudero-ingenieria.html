@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Escudero Ingeniería</title>
+<!-- Fonts loaded from system to avoid CORS errors on file:// -->
+<style>
+:root {
+  --bg:#060E1A; --bg2:#0B1829; --bg3:#101E32; --bg4:#162540; --bg5:#1C2E50;
+  --ac:#E8751A; --ac2:#FF9141; --acbg:rgba(232,117,26,.12); --acbd:rgba(232,117,26,.28);
+  --wh:#F2F6FF; --mu:#6B7E99; --mu2:#8A9BB5;
+  --gr:#10B981; --grbg:rgba(16,185,129,.12); --grbd:rgba(16,185,129,.3);
+  --rd:#F43F5E; --rdbg:rgba(244,63,94,.12); --rdbd:rgba(244,63,94,.3);
+  --yw:#F59E0B; --ywbg:rgba(245,158,11,.12); --ywbd:rgba(245,158,11,.3);
+  --bl:#3B82F6; --blbg:rgba(59,130,246,.12);
+  --r8:8px; --r12:12px; --r16:16px; --r20:20px; --r99:99px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--wh);height:100vh;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh;height:100vh;}
+#hdr{background:var(--bg2);border-bottom:1px solid var(--acbd);padding:14px 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hdr-logo{width:40px;height:40px;background:linear-gradient(135deg,var(--ac),var(--ac2));border-radius:var(--r12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hdr-name h1{font-family:-apple-system,'Helvetica Neue',Arial;font-size:19px;font-weight:800;color:var(--ac);line-height:1;text-transform:uppercase;letter-spacing:.5px;}
+.hdr-name p{font-size:10px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+#hdr-date{font-size:11px;color:var(--mu2);text-align:right;margin-left:auto;line-height:1.4;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+#content::-webkit-scrollbar{display:none;}
+#nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--acbd);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-size:8px;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;font-weight:600;cursor:pointer;border:none;background:none;position:relative;}
+.nb::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--ac);border-radius:0 0 2px 2px;transition:width .3s cubic-bezier(.34,1.56,.64,1);}
+.nb.on::before{width:28px;}
+.nb.on{color:var(--ac);}
+.ni{font-size:19px;transition:transform .2s;}
+.nb.on .ni{transform:scale(1.15);}
+
+/* ── SCREENS ── */
+.scr{display:none;padding:16px;animation:fu .25s ease;}
+.scr.on{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── CARDS ── */
+.card{background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r16);padding:14px;margin-bottom:12px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);}
+
+/* ── SECTION HEAD ── */
+.sch{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.sct{font-family:-apple-system,'Helvetica Neue',Arial;font-size:22px;font-weight:800;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sci{width:30px;height:30px;background:var(--acbg);border:1px solid var(--acbd);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:15px;}
+
+/* ── LABEL STRIP ── */
+.ls{font-family:-apple-system,'Helvetica Neue',Arial;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ac);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ls::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--acbd),transparent);}
+
+/* ── KPI ── */
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kc{background:var(--bg3);border-radius:var(--r12);padding:14px 12px 12px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.05);}
+.kbar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r8) var(--r8) 0 0;}
+.ko .kbar{background:linear-gradient(90deg,var(--ac),var(--ac2));}
+.kg2 .kbar{background:linear-gradient(90deg,var(--gr),#34D399);}
+.kr .kbar{background:linear-gradient(90deg,var(--rd),#FB7185);}
+.ky .kbar{background:linear-gradient(90deg,var(--yw),#FCD34D);}
+.kb2 .kbar{background:linear-gradient(90deg,var(--bl),#60A5FA);}
+.kv{font-family:-apple-system,'Helvetica Neue',Arial;font-size:26px;font-weight:700;line-height:1;margin-top:4px;}
+.ko .kv{color:var(--ac);} .kg2 .kv{color:var(--gr);} .kr .kv{color:var(--rd);} .ky .kv{color:var(--yw);} .kb2 .kv{color:var(--bl);}
+.kl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;font-weight:600;}
+.ks{font-size:10px;color:var(--mu);margin-top:2px;}
+
+/* ── ALERT ── */
+.aw{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.al{display:flex;align-items:center;gap:10px;border-radius:var(--r12);padding:11px 13px;font-size:12px;font-weight:500;line-height:1.4;border-left:3px solid;}
+.al-r{background:var(--rdbg);border-color:var(--rd);color:#FDA4AF;}
+.al-y{background:var(--ywbg);border-color:var(--yw);color:#FDE68A;}
+.ap{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pulse 1.5s infinite;}
+.al-r .ap{background:var(--rd);} .al-y .ap{background:var(--yw);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+
+/* ── SUMMARY STRIP ── */
+.ss{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--acbd);border-radius:var(--r16);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;}
+.ssi{width:46px;height:46px;border-radius:var(--r12);background:var(--acbg);border:1px solid var(--acbd);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sst h3{font-family:-apple-system,'Helvetica Neue',Arial;font-size:14px;font-weight:700;text-transform:uppercase;color:var(--mu2);letter-spacing:.5px;}
+.sst .sv{font-family:-apple-system,'Helvetica Neue',Arial;font-size:28px;font-weight:800;color:var(--ac);line-height:1;}
+.sst .sb{font-size:11px;color:var(--mu);margin-top:2px;}
+
+/* ── UPCOMING ── */
+.um{background:var(--bg4);border-radius:var(--r12);padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.05);cursor:pointer;}
+.umd{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.umb{flex:1;min-width:0;}
+.umc{font-weight:600;font-size:13px;}
+.umm{font-size:11px;color:var(--mu);margin-top:1px;}
+.umv{font-family:-apple-system,'Helvetica Neue',Arial;font-size:17px;font-weight:700;color:var(--ac);flex-shrink:0;}
+
+/* ── SERVICE CARDS ── */
+.sc2{background:var(--bg3);border-radius:var(--r16);padding:14px;margin-bottom:10px;cursor:pointer;border:1px solid rgba(255,255,255,.05);display:flex;gap:12px;align-items:flex-start;}
+.sstr{width:4px;border-radius:4px;flex-shrink:0;align-self:stretch;min-height:60px;}
+.sp .sstr{background:linear-gradient(180deg,var(--gr),#34D399);}
+.sd .sstr{background:linear-gradient(180deg,var(--rd),#FB7185);}
+.spe .sstr{background:linear-gradient(180deg,var(--yw),#FCD34D);}
+.sb2{flex:1;min-width:0;}
+.st{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;}
+.scl{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r99);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;}
+.b-p{background:var(--grbg);color:var(--gr);border:1px solid var(--grbd);}
+.b-d{background:var(--rdbg);color:var(--rd);border:1px solid var(--rdbd);}
+.b-pe{background:var(--ywbg);color:var(--yw);border:1px solid var(--ywbd);}
+.sm{display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--mu2);margin-bottom:6px;}
+.sf{display:flex;justify-content:space-between;align-items:center;}
+.sv2{font-family:-apple-system,'Helvetica Neue',Arial;font-size:20px;font-weight:700;color:var(--ac);}
+.gb{font-size:10px;background:var(--rdbg);color:#FDA4AF;border:1px solid var(--rdbd);padding:2px 7px;border-radius:var(--r99);}
+
+/* ── REPUESTO CARDS ── */
+.rc{background:var(--bg3);border-radius:var(--r16);padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.05);}
+.rt{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.rn{font-weight:700;font-size:14px;line-height:1.3;flex:1;}
+.stk-ok{background:var(--grbg);color:var(--gr);border:1px solid var(--grbd);}
+.stk-low{background:var(--ywbg);color:var(--yw);border:1px solid var(--ywbd);}
+.stk-no{background:var(--rdbg);color:var(--rd);border:1px solid var(--rdbd);}
+.rm{font-size:11px;color:var(--mu);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.rmc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r99);padding:2px 8px;}
+.pr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.pb{background:var(--bg4);border-radius:var(--r8);padding:8px;text-align:center;border:1px solid rgba(255,255,255,.05);}
+.pbl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;}
+.pbv{font-size:13px;font-weight:700;margin-top:3px;}
+.pbo{color:var(--ac);} .pbg{color:var(--gr);}
+.ra{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* ── VENTA CARDS ── */
+.vc{background:var(--bg3);border-radius:var(--r16);padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.vl{flex:1;min-width:0;}
+.vp{font-weight:700;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vm{font-size:11px;color:var(--mu2);}
+.vr2{text-align:right;flex-shrink:0;}
+.vt{font-family:-apple-system,'Helvetica Neue',Arial;font-size:22px;font-weight:700;color:var(--ac);}
+.vg{font-size:11px;color:var(--gr);font-weight:600;}
+.vmr{font-size:10px;color:var(--mu);}
+
+/* ── COMPRA CARDS ── */
+.cc{background:var(--bg3);border-radius:var(--r16);padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.05);}
+
+/* ── TRM BAR ── */
+.trm{background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r12);padding:12px 14px;display:flex;align-items:center;gap:0;margin-bottom:12px;}
+.tri{flex:1;text-align:center;}
+.trl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+.trv{font-family:-apple-system,'Helvetica Neue',Arial;font-size:18px;font-weight:700;color:var(--ac);margin-top:2px;}
+.trs{width:1px;height:34px;background:rgba(255,255,255,.07);margin:0 4px;}
+.trcfg{background:var(--acbg);border:1px solid var(--acbd);color:var(--ac);border-radius:var(--r8);padding:8px 12px;font-size:13px;cursor:pointer;font-weight:600;flex-shrink:0;border-style:solid;}
+
+/* ── SEARCH ── */
+.sw{background:var(--bg3);border:1px solid rgba(255,255,255,.07);border-radius:var(--r12);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sw:focus-within{border-color:var(--acbd);}
+.sw input{background:none;border:none;outline:none;color:var(--wh);font-size:14px;font-family:'Inter';flex:1;}
+.sw input::placeholder{color:var(--mu);}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--bg3);border-radius:var(--r12);padding:4px;gap:3px;margin-bottom:14px;border:1px solid rgba(255,255,255,.05);}
+.tab{flex:1;text-align:center;padding:9px 4px;font-size:11px;font-weight:700;border-radius:var(--r8);cursor:pointer;color:var(--mu);transition:all .2s;letter-spacing:.3px;text-transform:uppercase;}
+.tab.on{background:var(--ac);color:white;box-shadow:0 2px 8px rgba(232,117,26,.4);}
+
+/* ── FORMS ── */
+.fg{margin-bottom:14px;}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);display:block;margin-bottom:6px;}
+.fi{width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.08);border-radius:var(--r12);padding:12px 14px;color:var(--wh);font-size:15px;font-family:'Inter';outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,box-shadow .2s;}
+.fi:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acbg);}
+.fi option{background:var(--bg2);}
+textarea.fi{resize:none;line-height:1.5;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fh{font-size:11px;color:var(--mu);margin-top:5px;font-style:italic;}
+.md{background:var(--bg4);border:1px solid rgba(255,255,255,.07);border-radius:var(--r12);padding:12px 14px;font-size:20px;font-weight:700;font-family:-apple-system,'Helvetica Neue',Arial;text-align:center;transition:color .3s;}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:14px;border-radius:var(--r12);font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:'Inter';letter-spacing:.3px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.btn:active{transform:scale(.97);}
+.btn-p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:white;box-shadow:0 4px 16px rgba(232,117,26,.35);}
+.btn-g{background:rgba(255,255,255,.05);color:var(--mu2);border:1px solid rgba(255,255,255,.09);border-style:solid;}
+.btn-d{background:var(--rdbg);color:var(--rd);border:1px solid var(--rdbd);border-style:solid;}
+.btn-gr{background:var(--grbg);color:var(--gr);border:1px solid var(--grbd);border-style:solid;}
+.btn-sm{width:auto;padding:8px 13px;font-size:12px;border-radius:var(--r8);gap:5px;}
+.btn-mt{margin-top:9px;}
+
+/* ── CHIPS ── */
+.cw{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg4);border:1px solid rgba(255,255,255,.09);border-radius:var(--r99);padding:7px 13px;font-size:12px;cursor:pointer;transition:all .18s;font-weight:500;color:var(--mu2);border-style:solid;}
+.chip.on{background:var(--acbg);border-color:var(--ac);color:var(--ac);font-weight:700;}
+
+/* ── AUTOCOMPLETE ── */
+.acw{position:relative;}
+.acl{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:50;background:var(--bg2);border:1px solid var(--acbd);border-radius:var(--r12);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.6);max-height:240px;overflow-y:auto;display:none;}
+.acl::-webkit-scrollbar{display:none;}
+.aci{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);}
+.aci:last-child{border-bottom:none;}
+.aci:active{background:var(--acbg);}
+.acii{width:34px;height:34px;border-radius:var(--r8);flex-shrink:0;background:var(--acbg);border:1px solid var(--acbd);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.acin{flex:1;min-width:0;}
+.acin .an{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.acin .an mark{background:var(--acbg);color:var(--ac);border-radius:2px;padding:0 1px;font-weight:800;}
+.acin .as{font-size:10px;color:var(--mu);margin-top:2px;}
+.acp{font-family:-apple-system,'Helvetica Neue',Arial;font-size:15px;color:var(--ac);font-weight:700;flex-shrink:0;}
+.fb{background:linear-gradient(135deg,var(--grbg),rgba(16,185,129,.06));border:1px solid var(--grbd);border-radius:var(--r12);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px;color:#6EE7B7;}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px);}
+.mo.on{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border-radius:var(--r20) var(--r20) 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:0 16px 40px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);border-top:1px solid var(--acbd);box-shadow:0 -8px 40px rgba(0,0,0,.6);}
+.modal::-webkit-scrollbar{display:none;}
+.mo.on .modal{transform:translateY(0);}
+.mh{width:36px;height:4px;background:var(--bg5);border-radius:2px;margin:0 auto;position:absolute;top:10px;left:50%;transform:translateX(-50%);}
+.mt2{position:sticky;top:0;background:var(--bg2);z-index:2;padding:14px 0 12px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;}
+.mtit{font-family:-apple-system,'Helvetica Neue',Arial;font-size:22px;font-weight:800;color:var(--wh);letter-spacing:.5px;text-transform:uppercase;padding-top:24px;}
+.mc{width:32px;height:32px;border-radius:var(--r99);background:rgba(255,255,255,.07);border:none;color:var(--mu2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:22px;}
+.div{height:1px;background:rgba(255,255,255,.06);margin:14px 0;}
+.dr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px;}
+.dr:last-child{border-bottom:none;}
+.dl{color:var(--mu);font-size:12px;}
+.dv{font-weight:600;}
+.dt{font-family:-apple-system,'Helvetica Neue',Arial;font-size:22px;font-weight:700;color:var(--ac);}
+
+/* ── VENTA RESUMEN ── */
+.vres{background:var(--bg4);border-radius:var(--r12);padding:14px;margin-bottom:14px;border:1px solid rgba(255,255,255,.06);}
+.vrow{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.vrow:last-child{margin-bottom:0;}
+.vlb{color:var(--mu);}
+
+/* ── EXPORT ROW ── */
+.er{display:flex;gap:8px;}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:50px 20px;color:var(--mu);}
+.empty span{font-size:52px;margin-bottom:14px;display:block;}
+.empty p{font-size:13px;line-height:1.6;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg4);border:1px solid var(--acbd);color:var(--wh);padding:10px 18px;border-radius:var(--r99);font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.45);pointer-events:none;}
+
+
+#safari-banner{
+  background:linear-gradient(135deg,#92400e,#78350f);
+  border-bottom:2px solid #F59E0B;
+  padding:10px 14px;
+  font-size:12px;
+  color:#FDE68A;
+  line-height:1.5;
+  display:none;
+}
+#safari-banner b{color:#FCD34D;}
+#safari-banner.show{display:block;}
+
+/* ── PRINT ── */
+@media print {
+  body > * { display:none !important; }
+  #print-area { display:block !important; position:static !important; }
+}
+#print-area{display:none;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<div id="safari-banner">
+  ⚠️ <b>Estás en la vista previa de Claude</b> — las descargas no funcionan aquí.<br>
+  Para usar la app completa: toca <b>···</b> arriba → <b>Guardar como PDF</b>, o en PC descarga el archivo y pásalo por AirDrop.
+</div>
+<div id="hdr">
+  <div class="hdr-logo">⚙️</div>
+  <div class="hdr-name">
+    <h1>Escudero Ingeniería</h1>
+    <p>Especializada · Panel de control</p>
+  </div>
+  <div id="hdr-date"></div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- DASHBOARD -->
+  <div class="scr on" id="scr-dashboard">
+    <div id="aw" class="aw"></div>
+    <div class="ss"><div class="ssi">💼</div><div class="sst"><h3>Ingresos este mes</h3><div class="sv" id="d-tot">$0</div><div class="sb" id="d-sub">—</div></div></div>
+    <div class="ls">Servicios</div>
+    <div class="kg">
+      <div class="kc kg2"><div class="kbar"></div><div class="kv" id="k-sm">0</div><div class="kl">Servicios mes</div></div>
+      <div class="kc ko"><div class="kbar"></div><div class="kv" id="k-ing">$0</div><div class="kl">Cobrado</div></div>
+      <div class="kc kr"><div class="kbar"></div><div class="kv" id="k-deu">$0</div><div class="kl">Por cobrar</div><div class="ks" id="k-deun">0 clientes</div></div>
+      <div class="kc ky"><div class="kbar"></div><div class="kv" id="k-gas">$0</div><div class="kl">Gastos transporte</div></div>
+    </div>
+    <div class="ls">Inventario / Repuestos</div>
+    <div class="kg">
+      <div class="kc kg2"><div class="kbar"></div><div class="kv" id="k-vr">$0</div><div class="kl">Ventas repuestos</div></div>
+      <div class="kc kb2"><div class="kbar"></div><div class="kv" id="k-mg">0%</div><div class="kl">Margen promedio</div></div>
+      <div class="kc ky"><div class="kbar"></div><div class="kv" id="k-sb">0</div><div class="kl">Stock bajo</div></div>
+      <div class="kc kr"><div class="kbar"></div><div class="kv" id="k-ss">0</div><div class="kl">Sin stock</div></div>
+    </div>
+    <div class="ls">Próximos / Pendientes</div>
+    <div id="d-prox"></div>
+    <div class="div"></div>
+    <div class="er">
+      <button class="btn btn-g" onclick="expExcel()">📊 Exportar Excel</button>
+      <button class="btn btn-g" onclick="expPDF()">📄 Exportar PDF</button>
+    </div>
+    <div style="height:8px;"></div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <div class="scr" id="scr-servicios">
+    <div class="sch"><div class="sct"><div class="sci">🔧</div>Servicios</div><button class="btn btn-p btn-sm" onclick="abrirServ()">+ Nuevo</button></div>
+    <div class="tabs">
+      <div class="tab on" onclick="filtS('todos',this)">Todos</div>
+      <div class="tab" onclick="filtS('pendiente',this)">Pendientes</div>
+      <div class="tab" onclick="filtS('debe',this)">Cobrar</div>
+      <div class="tab" onclick="filtS('pagado',this)">Pagados</div>
+    </div>
+    <div id="l-serv"></div>
+  </div>
+
+  <!-- INVENTARIO -->
+  <div class="scr" id="scr-inventario">
+    <div class="sch"><div class="sct"><div class="sci">🔩</div>Inventario</div><button class="btn btn-p btn-sm" onclick="abrirRep()">+ Repuesto</button></div>
+    <div class="trm">
+      <div class="tri"><div class="trl">TRM Compra</div><div class="trv" id="trm-c">$3.700</div></div>
+      <div class="trs"></div>
+      <div class="tri"><div class="trl">TRM Venta</div><div class="trv" id="trm-v">$3.950</div></div>
+      <div class="trs"></div>
+      <div class="tri"><div class="trl">Stk. mín.</div><div class="trv" id="trm-sm">3</div></div>
+      <div class="trs"></div>
+      <button class="trcfg" onclick="abrirCfg()">⚙️</button>
+    </div>
+    <div class="sw"><span style="color:var(--mu)">🔍</span><input type="text" placeholder="Buscar repuesto..." id="s-rep" oninput="renderInv()"></div>
+    <div id="l-inv"></div>
+  </div>
+
+  <!-- COMPRAS -->
+  <div class="scr" id="scr-compras">
+    <div class="sch"><div class="sct"><div class="sci">🛒</div>Compras</div><button class="btn btn-p btn-sm" onclick="abrirCompra()">+ Compra</button></div>
+    <div class="tabs">
+      <div class="tab on" onclick="filtC('todas',this)">Todas</div>
+      <div class="tab" onclick="filtC('mes',this)">Este mes</div>
+    </div>
+    <div id="l-comp"></div>
+  </div>
+
+  <!-- VENTAS -->
+  <div class="scr" id="scr-ventas">
+    <div class="sch"><div class="sct"><div class="sci">💰</div>Ventas</div><button class="btn btn-p btn-sm" onclick="abrirVenta()">+ Venta</button></div>
+    <div id="l-vent"></div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- NAV -->
+<div id="nav">
+  <button class="nb on" onclick="ir('dashboard',this)"><span class="ni">📊</span>Dashboard</button>
+  <button class="nb" onclick="ir('servicios',this)"><span class="ni">🔧</span>Servicios</button>
+  <button class="nb" onclick="ir('inventario',this)"><span class="ni">🔩</span>Inventario</button>
+  <button class="nb" onclick="ir('compras',this)"><span class="ni">🛒</span>Compras</button>
+  <button class="nb" onclick="ir('ventas',this)"><span class="ni">💰</span>Ventas</button>
+</div>
+
+</div><!-- /app -->
+
+<!-- MODAL SERVICIO -->
+<div class="mo" id="m-serv">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit" id="ms-tit">Nuevo Servicio</div><button class="mc" onclick="cerrar('m-serv')">✕</button></div>
+  <div class="fg"><label class="fl">Cliente *</label><input type="text" class="fi" id="ms-cli" placeholder="Nombre del cliente" autocomplete="off"></div>
+  <div class="fg"><label class="fl">Empresa / Lugar</label><input type="text" class="fi" id="ms-emp" placeholder="Empresa o dirección" autocomplete="off"></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Fecha *</label><input type="date" class="fi" id="ms-fec"></div>
+    <div class="fg"><label class="fl">Hora</label><input type="time" class="fi" id="ms-hor"></div>
+  </div>
+  <div class="fg"><label class="fl">Equipo / Máquina</label><input type="text" class="fi" id="ms-eq" placeholder="Ej: Plotter HP L26500" autocomplete="off"></div>
+  <div class="fg"><label class="fl">Tipo de servicio</label>
+    <select class="fi" id="ms-tipo">
+      <option value="">Seleccionar...</option>
+      <option>Mantenimiento preventivo</option><option>Mantenimiento correctivo</option>
+      <option>Diagnóstico</option><option>Instalación</option><option>Calibración</option>
+      <option>Reemplazo de repuesto</option><option>Otro</option>
+    </select>
+  </div>
+  <div class="fg"><label class="fl">Descripción</label><textarea class="fi" id="ms-desc" rows="3" placeholder="Detalla el trabajo..."></textarea></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Valor (COP) *</label><input type="number" class="fi" id="ms-val" placeholder="0" inputmode="numeric"></div>
+    <div class="fg"><label class="fl">Estado pago</label>
+      <select class="fi" id="ms-pago">
+        <option value="pendiente">⏳ Pendiente</option>
+        <option value="pagado">✅ Pagado</option>
+        <option value="debe">🔴 Debe</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Gastos de desplazamiento</label>
+    <div class="cw">
+      <div class="chip" data-t="Uber" onclick="togChip(this)">🚗 Uber</div>
+      <div class="chip" data-t="Gasolina" onclick="togChip(this)">⛽ Gasolina</div>
+      <div class="chip" data-t="Parqueadero" onclick="togChip(this)">🅿️ Parqueadero</div>
+      <div class="chip" data-t="Metro" onclick="togChip(this)">🚇 Metro</div>
+      <div class="chip" data-t="Bus" onclick="togChip(this)">🚌 Bus</div>
+      <div class="chip" data-t="Taxi" onclick="togChip(this)">🚕 Taxi</div>
+      <div class="chip" data-t="Otro" onclick="togChip(this)">➕ Otro</div>
+    </div>
+    <div id="gi"></div>
+  </div>
+  <button class="btn btn-p" onclick="guardarServ()">💾 Guardar Servicio</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-serv')">Cancelar</button>
+</div></div>
+
+<!-- MODAL DETALLE SERVICIO -->
+<div class="mo" id="m-det">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit" id="det-tit">Detalle</div><button class="mc" onclick="cerrar('m-det')">✕</button></div>
+  <div id="det-body"></div>
+</div></div>
+
+<!-- MODAL REPUESTO -->
+<div class="mo" id="m-rep">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit" id="mr-tit">Nuevo Repuesto</div><button class="mc" onclick="cerrar('m-rep')">✕</button></div>
+  <div id="mr-fb" class="fb" style="display:none;">✅ <span>Datos cargados de <b id="mr-fbn"></b> — edita lo que necesites</span></div>
+  <div class="fg"><label class="fl">Nombre *</label>
+    <div class="acw">
+      <input type="text" class="fi" id="mr-nom" placeholder="Escribe para buscar o crear nuevo..." autocomplete="off" oninput="acRep(this.value)" onfocus="acRep(this.value)">
+      <div class="acl" id="mr-acl"></div>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Categoría</label>
+      <select class="fi" id="mr-cat">
+        <option>CUCHILLAS</option><option>PLOTTER</option><option>TINTAS</option>
+        <option>CABEZALES</option><option>IMPRE LATEX</option><option>OTRO</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Proveedor</label><input type="text" class="fi" id="mr-prov" placeholder="AliExpress..." autocomplete="off"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Moneda compra</label>
+      <select class="fi" id="mr-mon" onchange="onMonRep()">
+        <option value="COP">🇨🇴 COP</option><option value="USD">🇺🇸 USD</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl" id="mr-pcl">Precio compra (COP)</label><input type="number" class="fi" id="mr-pc" placeholder="0" inputmode="decimal" oninput="calcMargRep()"></div>
+  </div>
+  <div class="fg" id="mr-trmw" style="display:none;"><label class="fl">TRM aplicada</label><input type="number" class="fi" id="mr-trm" placeholder="3700" inputmode="numeric" oninput="calcMargRep()"><div class="fh" id="mr-hint">COP: $0</div></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Stock actual</label><input type="number" class="fi" id="mr-stk" placeholder="0" min="0" inputmode="numeric"></div>
+    <div class="fg"><label class="fl">Stock mínimo</label><input type="number" class="fi" id="mr-smin" placeholder="1" min="0" inputmode="numeric"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Precio venta (COP)</label><input type="number" class="fi" id="mr-pv" placeholder="0" inputmode="numeric" oninput="calcMargRep()"></div>
+    <div class="fg"><label class="fl">Margen calculado</label><div class="md" id="mr-marg">—</div></div>
+  </div>
+  <button class="btn btn-p" onclick="guardarRep()">💾 Guardar Repuesto</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-rep')">Cancelar</button>
+</div></div>
+
+<!-- MODAL COMPRA -->
+<div class="mo" id="m-comp">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit" id="mc-tit">Nueva Compra</div><button class="mc" onclick="cerrar('m-comp')">✕</button></div>
+  <div class="fg"><label class="fl">Repuesto *</label>
+    <div class="acw">
+      <input type="text" class="fi" id="mc-nom" placeholder="Escribe el nombre..." autocomplete="off" oninput="acComp(this.value)" onfocus="acComp(this.value)">
+      <div class="acl" id="mc-acl"></div>
+    </div>
+    <input type="hidden" id="mc-rid">
+    <div id="mc-badge" class="fb" style="display:none;margin-top:8px;">🔩 <span>Repuesto: <b id="mc-bnom"></b></span></div>
+  </div>
+  <div class="fg"><label class="fl">Proveedor *</label><input type="text" class="fi" id="mc-prov" placeholder="AliExpress, Barranquilla..." autocomplete="off"></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Fecha</label><input type="date" class="fi" id="mc-fec"></div>
+    <div class="fg"><label class="fl">Cantidad</label><input type="number" class="fi" id="mc-cant" value="1" min="1" inputmode="numeric" oninput="calcComp()"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Moneda</label>
+      <select class="fi" id="mc-mon" onchange="onMonComp()">
+        <option value="COP">🇨🇴 COP</option><option value="USD">🇺🇸 USD</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl" id="mc-pl">Precio unitario (COP)</label><input type="number" class="fi" id="mc-pre" placeholder="0" inputmode="decimal" oninput="calcComp()"></div>
+  </div>
+  <div class="fg" id="mc-trmw" style="display:none;"><label class="fl">TRM aplicada</label><input type="number" class="fi" id="mc-trm" inputmode="numeric" oninput="calcComp()"><div class="fh" id="mc-hint">Total COP: $0</div></div>
+  <div class="fg"><label class="fl">Notas (opcional)</label><input type="text" class="fi" id="mc-not" placeholder="Número de pedido, referencia..." autocomplete="off"></div>
+  <div class="vres" id="mc-res" style="display:none;">
+    <div class="vrow"><span class="vlb">Cantidad:</span><span id="mc-rc" style="font-weight:700;">0 uds</span></div>
+    <div class="vrow"><span class="vlb">Precio COP/u:</span><span id="mc-rp" style="font-weight:700;">$0</span></div>
+    <div class="vrow"><span class="vlb">Total inversión:</span><span id="mc-rt" style="color:var(--ac);font-weight:700;">$0</span></div>
+    <div class="vrow"><span class="vlb">Stock resultante:</span><span id="mc-rs" style="color:var(--gr);font-weight:700;">0 uds</span></div>
+  </div>
+  <button class="btn btn-p" onclick="guardarComp()">🛒 Registrar Compra</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-comp')">Cancelar</button>
+</div></div>
+
+<!-- MODAL VENTA -->
+<div class="mo" id="m-vent">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit">Nueva Venta</div><button class="mc" onclick="cerrar('m-vent')">✕</button></div>
+  <div class="fg"><label class="fl">Repuesto *</label>
+    <select class="fi" id="mv-rep" onchange="onRepVent()"><option value="">Seleccionar...</option></select>
+  </div>
+  <div class="fg"><label class="fl">Cliente</label><input type="text" class="fi" id="mv-cli" placeholder="Nombre del cliente" autocomplete="off"></div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Cantidad</label><input type="number" class="fi" id="mv-cant" value="1" min="1" inputmode="numeric" oninput="calcVent()"></div>
+    <div class="fg"><label class="fl">Precio venta (COP)</label><input type="number" class="fi" id="mv-pre" placeholder="0" inputmode="numeric" oninput="calcVent()"></div>
+  </div>
+  <div class="fg"><label class="fl">Fecha</label><input type="date" class="fi" id="mv-fec"></div>
+  <div class="vres">
+    <div class="vrow"><span class="vlb">Total venta:</span><span id="vr-tot" style="font-weight:700;">$0</span></div>
+    <div class="vrow"><span class="vlb">Costo mercancía:</span><span id="vr-cos" style="color:var(--mu);">$0</span></div>
+    <div class="vrow"><span class="vlb">Ganancia neta:</span><span id="vr-gan" style="color:var(--gr);font-weight:700;">$0</span></div>
+    <div class="vrow"><span class="vlb">Margen real:</span><span id="vr-mar" style="color:var(--ac);font-weight:700;">0%</span></div>
+  </div>
+  <button class="btn btn-p" onclick="guardarVent()">✅ Registrar Venta</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-vent')">Cancelar</button>
+</div></div>
+
+<!-- MODAL CONFIG -->
+<div class="mo" id="m-cfg">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit">⚙️ Configuración</div><button class="mc" onclick="cerrar('m-cfg')">✕</button></div>
+  <div class="ls">Tasas de cambio</div>
+  <div class="fr">
+    <div class="fg"><label class="fl">TRM Compra</label><input type="number" class="fi" id="cfg-tc" inputmode="numeric"></div>
+    <div class="fg"><label class="fl">TRM Venta</label><input type="number" class="fi" id="cfg-tv" inputmode="numeric"></div>
+  </div>
+  <div class="ls">Parámetros</div>
+  <div class="fr">
+    <div class="fg"><label class="fl">Stock mínimo global</label><input type="number" class="fi" id="cfg-sm" inputmode="numeric"></div>
+    <div class="fg"><label class="fl">Margen objetivo (%)</label><input type="number" class="fi" id="cfg-mo" inputmode="numeric"></div>
+  </div>
+  <button class="btn btn-p" onclick="guardarCfg()">💾 Guardar</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-cfg')">Cancelar</button>
+</div></div>
+
+<!-- MODAL EXCEL -->
+<div class="mo" id="m-excel">
+<div class="modal">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit">📊 Exportar CSV</div><button class="mc" onclick="cerrar('m-excel')">✕</button></div>
+  <div style="background:var(--acbg);border:1px solid var(--acbd);border-radius:var(--r12);padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.8;color:#FFB470;">
+    <b style="color:var(--ac);">📱 En iPhone Safari:</b><br>
+    1. Toca el área de texto abajo<br>
+    2. Mantén presionado → <b>Seleccionar todo</b><br>
+    3. <b>Copiar</b> → pega en Notes o email<br><br>
+    <b style="color:var(--ac);">💻 En PC / Mac:</b> toca "Descargar archivo"
+  </div>
+  <textarea id="csv-area" readonly style="width:100%;height:160px;background:var(--bg4);border:1px solid rgba(255,255,255,.08);border-radius:var(--r12);padding:12px;color:var(--mu2);font-size:10px;font-family:monospace;resize:none;-webkit-user-select:all;user-select:all;display:block;"></textarea>
+  <button class="btn btn-p" style="margin-top:10px;" onclick="copCSV()">📋 Seleccionar todo</button>
+  <button class="btn btn-g btn-mt" onclick="dlCSV()">💾 Descargar archivo (PC/Mac)</button>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-excel')">Cerrar</button>
+</div></div>
+
+<!-- MODAL PDF REPORTE -->
+<div class="mo" id="m-pdf">
+<div class="modal" style="max-height:96vh;">
+  <div class="mh"></div>
+  <div class="mt2"><div class="mtit">📄 Reporte</div><button class="mc" onclick="cerrar('m-pdf')">✕</button></div>
+  <div style="background:var(--acbg);border:1px solid var(--acbd);border-radius:var(--r12);padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:1.8;color:#FFB470;">
+    <b style="color:var(--ac);">📱 En iPhone Safari:</b><br>
+    Toca <b>"🖨️ Imprimir"</b> abajo → en la vista previa pellizca para ampliar → toca el ícono <b>Compartir (□↑)</b> → <b>"Guardar como PDF"</b><br><br>
+    <b style="color:var(--ac);">💻 En PC:</b> toca "Imprimir" → selecciona "Guardar como PDF"
+  </div>
+  <button class="btn btn-p" onclick="imprimirPDF()">🖨️ Imprimir / Guardar PDF</button>
+  <div id="pdf-body" style="margin-top:14px;"></div>
+  <button class="btn btn-g btn-mt" onclick="cerrar('m-pdf')">Cerrar</button>
+</div></div>
+
+</div><!-- /app -->
+
+<!-- PRINT AREA -->
+<div id="print-area"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════
+   DB
+══════════════════════════════════ */
+var DB = { servicios:[], repuestos:[], ventas:[], compras:[], config:{trmCompra:3700,trmVenta:3950,stockMin:3,margenObj:40} };
+var editServId=null, editRepId=null, filtServ='todos', filtComp='todas', cRepId=null;
+var _csv='';
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+function init(){
+  // Cargar datos — migra key viejo si existe
+  try {
+    var raw = localStorage.getItem('escudero_v2') || localStorage.getItem('ei_v3') || localStorage.getItem('escudero-ing');
+    if(raw){ DB=JSON.parse(raw); }
+  } catch(e){}
+  DB.servicios=DB.servicios||[]; DB.repuestos=DB.repuestos||[];
+  DB.ventas=DB.ventas||[];       DB.compras=DB.compras||[];
+  DB.config=Object.assign({trmCompra:3700,trmVenta:3950,stockMin:3,margenObj:40},DB.config||{});
+  if(!DB.repuestos.length) seedInv();
+
+  var d=new Date();
+  var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var mes=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('hdr-date').innerHTML=dias[d.getDay()]+', '+d.getDate()+' '+mes[d.getMonth()]+'<br><span style="color:var(--mu);font-size:9px;">'+d.getFullYear()+'</span>';
+
+  [].forEach.call(document.querySelectorAll('.mo'), function(o){
+    o.addEventListener('click',function(e){ if(e.target===this) cerrar(this.id); });
+  });
+  renderAll();
+
+  // Show banner if running inside claude.ai iframe (about: protocol)
+  if(window.location.protocol==='about:' || window.location.protocol==='blob:' || window.self!==window.top){
+    var b=document.getElementById('safari-banner');
+    if(b) b.className='show';
+  }
+}
+
+function save(){ try{ localStorage.setItem('escudero-ing',JSON.stringify(DB)); }catch(e){} }
+
+function renderAll(){ renderDash(); renderServ(); renderInv(); renderComp(); renderVent(); updTrm(); }
+
+/* ══════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════ */
+function ir(s,btn){
+  [].forEach.call(document.querySelectorAll('.scr'), function(x){x.classList.remove('on');});
+  [].forEach.call(document.querySelectorAll('.nb'), function(x){x.classList.remove('on');});
+  document.getElementById('scr-'+s).classList.add('on');
+  btn.classList.add('on');
+  document.getElementById('content').scrollTo({top:0,behavior:'instant'});
+}
+
+/* ══════════════════════════════════
+   MODALES
+══════════════════════════════════ */
+function abrir(id){ document.getElementById(id).classList.add('on'); }
+function cerrar(id){ document.getElementById(id).classList.remove('on'); }
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+var _tt;
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(_tt);
+  _tt=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(20px)'; },2400);
+}
+
+/* ══════════════════════════════════
+   FORMATO
+══════════════════════════════════ */
+function fCOP(n){ return '$'+(Math.round(n||0)).toLocaleString('es-CO'); }
+function fK(n){ if(!n)return'$0'; if(n>=1000000)return'$'+(n/1000000).toFixed(1).replace('.',',')+'M'; if(n>=1000)return'$'+(n/1000).toFixed(0)+'K'; return'$'+Math.round(n).toLocaleString('es-CO'); }
+function fF(iso){ if(!iso)return'—'; var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('es-CO',{day:'2-digit',month:'short'}); }
+function fFL(iso){ if(!iso)return'—'; var d=new Date(iso+'T12:00:00'); return d.toLocaleDateString('es-CO',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}); }
+
+/* ══════════════════════════════════
+   DASHBOARD
+══════════════════════════════════ */
+function renderDash(){
+  var hoy=new Date(), mes=hoy.getMonth(), anio=hoy.getFullYear();
+  var sm=DB.servicios.filter(function(s){ var d=new Date(s.fecha+'T12:00:00'); return d.getMonth()===mes&&d.getFullYear()===anio; });
+  var ing=sm.filter(function(s){return s.pago==='pagado';}).reduce(function(a,s){return a+(+s.valor||0);},0);
+  var deu=DB.servicios.filter(function(s){return s.pago==='debe';}).reduce(function(a,s){return a+(+s.valor||0);},0);
+  var nDeu=DB.servicios.filter(function(s){return s.pago==='debe';}).length;
+  var gas=sm.reduce(function(a,s){return a+(s.gastos||[]).reduce(function(b,g){return b+(+g.monto||0);},0);},0);
+  var vm=DB.ventas.filter(function(v){ var d=new Date(v.fecha+'T12:00:00'); return d.getMonth()===mes&&d.getFullYear()===anio; });
+  var tv=vm.reduce(function(a,v){return a+(+v.totalVenta||0);},0);
+  var mars=DB.ventas.filter(function(v){return v.margenReal>0;}).map(function(v){return v.margenReal;});
+  var mp=mars.length?(mars.reduce(function(a,b){return a+b;},0)/mars.length*100).toFixed(1):0;
+  var sb=DB.repuestos.filter(function(r){return r.stockActual>0&&r.stockActual<=r.stockMin;}).length;
+  var ss=DB.repuestos.filter(function(r){return r.stockActual===0;}).length;
+
+  document.getElementById('d-tot').textContent=fCOP(ing+tv);
+  document.getElementById('d-sub').textContent=sm.length+' servicios · '+vm.length+' ventas';
+  document.getElementById('k-sm').textContent=sm.length;
+  document.getElementById('k-ing').textContent=fK(ing);
+  document.getElementById('k-deu').textContent=fK(deu);
+  document.getElementById('k-deun').textContent=nDeu+' cliente'+(nDeu!==1?'s':'');
+  document.getElementById('k-gas').textContent=fK(gas);
+  document.getElementById('k-vr').textContent=fK(tv);
+  document.getElementById('k-mg').textContent=mp+'%';
+  document.getElementById('k-sb').textContent=sb;
+  document.getElementById('k-ss').textContent=ss;
+
+  // Alertas
+  var aw=document.getElementById('aw');
+  var crit=DB.repuestos.filter(function(r){return r.stockActual===0;});
+  var bajo=DB.repuestos.filter(function(r){return r.stockActual>0&&r.stockActual<=r.stockMin;});
+  var html='';
+  if(crit.length) html+='<div class="al al-r"><div class="ap"></div><div><b>Sin stock:</b> '+crit.map(function(r){return r.nombre;}).join(', ')+'</div></div>';
+  if(bajo.length) html+='<div class="al al-y"><div class="ap"></div><div><b>Stock bajo:</b> '+bajo.map(function(r){return r.nombre;}).join(', ')+'</div></div>';
+  aw.innerHTML=html;
+
+  // Proximos
+  var dp=document.getElementById('d-prox');
+  var prox=DB.servicios.filter(function(s){return s.pago==='pendiente'||s.pago==='debe';}).sort(function(a,b){return new Date(a.fecha)-new Date(b.fecha);}).slice(0,5);
+  if(!prox.length){ dp.innerHTML='<div class="empty"><span>📅</span><p>Sin servicios pendientes</p></div>'; return; }
+  dp.innerHTML=prox.map(function(s){
+    var col=s.pago==='pagado'?'var(--gr)':s.pago==='debe'?'var(--rd)':'var(--yw)';
+    return '<div class="um" onclick="verServ(\''+s.id+'\')"><div class="umd" style="background:'+col+';box-shadow:0 0 6px '+col+';"></div><div class="umb"><div class="umc">'+s.cliente+'</div><div class="umm">'+fF(s.fecha)+(s.hora?' · '+s.hora:'')+(s.equipo?' · '+s.equipo:'')+'</div></div><div class="umv">'+fCOP(s.valor)+'</div></div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════
+   SERVICIOS
+══════════════════════════════════ */
+function abrirServ(id){
+  editServId=id||null;
+  document.getElementById('ms-tit').textContent=id?'Editar Servicio':'Nuevo Servicio';
+  ['ms-cli','ms-emp','ms-eq','ms-desc','ms-val'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('ms-tipo').value='';
+  document.getElementById('ms-pago').value='pendiente';
+  [].forEach.call(document.querySelectorAll('.chip'), function(c){c.classList.remove('on');});
+  document.getElementById('gi').innerHTML='';
+  if(id){
+    var s=DB.servicios.find(function(x){return x.id===id;});
+    if(s){
+      document.getElementById('ms-cli').value=s.cliente||'';
+      document.getElementById('ms-emp').value=s.empresa||'';
+      document.getElementById('ms-fec').value=s.fecha||'';
+      document.getElementById('ms-hor').value=s.hora||'';
+      document.getElementById('ms-eq').value=s.equipo||'';
+      document.getElementById('ms-tipo').value=s.tipo||'';
+      document.getElementById('ms-desc').value=s.descripcion||'';
+      document.getElementById('ms-val').value=s.valor||'';
+      document.getElementById('ms-pago').value=s.pago||'pendiente';
+      (s.gastos||[]).forEach(function(g){
+        var chip=document.querySelector('.chip[data-t="'+g.tipo+'"]');
+        if(chip){chip.classList.add('on');mkGasto(g.tipo);}
+        setTimeout(function(){var inp=document.getElementById('gi-'+g.tipo);if(inp)inp.value=g.monto;},50);
+      });
+    }
+  } else {
+    document.getElementById('ms-fec').value=new Date().toISOString().split('T')[0];
+    document.getElementById('ms-hor').value=new Date().toTimeString().slice(0,5);
+  }
+  abrir('m-serv');
+}
+
+function togChip(chip){
+  chip.classList.toggle('on');
+  var t=chip.dataset.t;
+  if(chip.classList.contains('on')) mkGasto(t);
+  else { var r=document.getElementById('gi-row-'+t); if(r)r.remove(); }
+}
+function mkGasto(t){
+  if(document.getElementById('gi-row-'+t))return;
+  var emo={Uber:'🚗',Gasolina:'⛽',Parqueadero:'🅿️',Metro:'🚇',Bus:'🚌',Taxi:'🚕',Otro:'💸'}[t]||'💸';
+  var div=document.createElement('div'); div.className='fg'; div.id='gi-row-'+t;
+  div.innerHTML='<label class="fl">'+emo+' '+t+' (COP)</label><input type="number" class="fi" id="gi-'+t+'" placeholder="Monto" inputmode="numeric">';
+  document.getElementById('gi').appendChild(div);
+}
+
+function guardarServ(){
+  var cli=document.getElementById('ms-cli').value.trim();
+  var fec=document.getElementById('ms-fec').value;
+  if(!cli){toast('⚠️ El nombre del cliente es requerido');return;}
+  if(!fec){toast('⚠️ La fecha es requerida');return;}
+  var gastos=[];
+  [].forEach.call(document.querySelectorAll('.chip.on'), function(chip){
+    var t=chip.dataset.t;
+    var m=+(document.getElementById('gi-'+t)||{}).value||0;
+    if(m>0) gastos.push({tipo:t,monto:m});
+  });
+  var s={
+    id:editServId||'SRV-'+Date.now(),
+    cliente:cli, empresa:document.getElementById('ms-emp').value.trim(),
+    fecha:fec, hora:document.getElementById('ms-hor').value,
+    equipo:document.getElementById('ms-eq').value.trim(),
+    tipo:document.getElementById('ms-tipo').value,
+    descripcion:document.getElementById('ms-desc').value.trim(),
+    valor:+document.getElementById('ms-val').value||0,
+    pago:document.getElementById('ms-pago').value, gastos:gastos
+  };
+  if(editServId){ var i=DB.servicios.findIndex(function(x){return x.id===editServId;}); if(i>-1)DB.servicios[i]=s; }
+  else DB.servicios.unshift(s);
+  save(); cerrar('m-serv'); renderServ(); renderDash();
+  toast(editServId?'✅ Servicio actualizado':'✅ Servicio registrado');
+}
+
+function filtS(f,tab){
+  filtServ=f;
+  [].forEach.call(document.querySelectorAll('#scr-servicios .tab'), function(t){t.classList.remove('on');});
+  tab.classList.add('on');
+  renderServ();
+}
+
+function renderServ(){
+  var lista=DB.servicios.slice().sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+  if(filtServ!=='todos') lista=lista.filter(function(s){return s.pago===filtServ;});
+  var div=document.getElementById('l-serv');
+  if(!lista.length){div.innerHTML='<div class="empty"><span>🔧</span><p>No hay servicios aquí.<br>Toca "+ Nuevo" para comenzar.</p></div>';return;}
+  div.innerHTML=lista.map(function(s){
+    var tg=(s.gastos||[]).reduce(function(a,g){return a+(+g.monto||0);},0);
+    var bc=s.pago==='pagado'?'b-p':s.pago==='debe'?'b-d':'b-pe';
+    var bt=s.pago==='pagado'?'✅ Pagado':s.pago==='debe'?'🔴 Debe':'⏳ Pendiente';
+    var sc2=s.pago==='pagado'?'sp':s.pago==='debe'?'sd':'spe';
+    return '<div class="sc2 '+sc2+'" onclick="verServ(\''+s.id+'\')"><div class="sstr"></div><div class="sb2"><div class="st"><div class="scl">'+s.cliente+'</div><div class="badge '+bc+'">'+bt+'</div></div><div class="sm"><span>📅 '+fF(s.fecha)+(s.hora?' · '+s.hora:'')+'</span>'+(s.equipo?'<span>🖨️ '+s.equipo+'</span>':'')+(s.empresa?'<span>🏢 '+s.empresa+'</span>':'')+'</div>'+(s.tipo?'<div style="font-size:11px;color:var(--mu2);margin-bottom:6px;">🔧 '+s.tipo+'</div>':'')+'<div class="sf"><div class="sv2">'+fCOP(s.valor)+'</div>'+(tg>0?'<div class="gb">-'+fCOP(tg)+' gastos</div>':'')+'</div></div></div>';
+  }).join('');
+}
+
+function verServ(id){
+  var s=DB.servicios.find(function(x){return x.id===id;}); if(!s)return;
+  var tg=(s.gastos||[]).reduce(function(a,g){return a+(+g.monto||0);},0);
+  var col=s.pago==='pagado'?'var(--gr)':s.pago==='debe'?'var(--rd)':'var(--yw)';
+  var bt=s.pago==='pagado'?'✅ Pagado':s.pago==='debe'?'🔴 Debe':'⏳ Pendiente';
+  document.getElementById('det-tit').textContent=s.cliente;
+  document.getElementById('det-body').innerHTML=
+    (s.empresa?'<div style="font-size:13px;color:var(--mu2);margin-bottom:12px;">🏢 '+s.empresa+'</div>':'')+
+    '<div class="card">'+
+    '<div class="dr"><span class="dl">Fecha y hora</span><span class="dv">'+fFL(s.fecha)+(s.hora?' · '+s.hora:'')+'</span></div>'+
+    '<div class="dr"><span class="dl">Equipo</span><span class="dv">'+(s.equipo||'—')+'</span></div>'+
+    '<div class="dr"><span class="dl">Tipo</span><span class="dv">'+(s.tipo||'—')+'</span></div>'+
+    (s.descripcion?'<div class="dr" style="flex-direction:column;align-items:flex-start;gap:4px;"><span class="dl">Descripción</span><span style="font-size:13px;line-height:1.5;">'+s.descripcion+'</span></div>':'')+
+    '<div class="div"></div>'+
+    '<div class="dr"><span class="dl">Valor del servicio</span><span class="dt">'+fCOP(s.valor)+'</span></div>'+
+    (s.gastos||[]).map(function(g){return'<div class="dr"><span class="dl">'+g.tipo+'</span><span style="color:var(--rd);">'+fCOP(g.monto)+'</span></div>';}).join('')+
+    (tg>0?'<div class="dr"><span class="dl">Total gastos</span><span style="color:var(--rd);font-weight:700;">'+fCOP(tg)+'</span></div><div class="dr"><span class="dl">Neto recibido</span><span style="color:var(--gr);font-weight:700;">'+fCOP(s.valor-tg)+'</span></div>':'')+
+    '<div class="div"></div>'+
+    '<div class="dr"><span class="dl">Estado</span><span style="color:'+col+';font-weight:700;">'+bt+'</span></div></div>'+
+    '<div class="er"><button class="btn btn-g" style="font-size:13px;" onclick="editServ(\''+s.id+'\')">✏️ Editar</button><button class="btn btn-d" style="font-size:13px;" onclick="delServ(\''+s.id+'\')">🗑️ Eliminar</button></div>'+
+    (s.pago!=='pagado'?'<button class="btn btn-gr btn-mt" onclick="mkPag(\''+s.id+'\')">✅ Marcar Pagado</button>':'')+
+    (s.pago==='pendiente'?'<button class="btn btn-d btn-mt" onclick="mkDebe(\''+s.id+'\')">🔴 Marcar Debe</button>':'');
+  abrir('m-det');
+}
+
+function editServ(id){ cerrar('m-det'); setTimeout(function(){abrirServ(id);},300); }
+function delServ(id){ if(!confirm('¿Eliminar este servicio?'))return; DB.servicios=DB.servicios.filter(function(s){return s.id!==id;}); save(); cerrar('m-det'); renderServ(); renderDash(); toast('🗑️ Eliminado'); }
+function mkPag(id){ var s=DB.servicios.find(function(x){return x.id===id;}); if(s){s.pago='pagado';save();cerrar('m-det');renderServ();renderDash();toast('✅ Marcado como pagado');} }
+function mkDebe(id){ var s=DB.servicios.find(function(x){return x.id===id;}); if(s){s.pago='debe';save();cerrar('m-det');renderServ();renderDash();toast('🔴 Marcado como debe');} }
+
+/* ══════════════════════════════════
+   INVENTARIO / REPUESTOS
+══════════════════════════════════ */
+function abrirRep(id){
+  editRepId=id||null;
+  document.getElementById('mr-tit').textContent=id?'Editar Repuesto':'Nuevo Repuesto';
+  ['mr-nom','mr-prov','mr-pc','mr-stk','mr-smin','mr-pv'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('mr-cat').value='CUCHILLAS';
+  document.getElementById('mr-mon').value='COP';
+  document.getElementById('mr-trmw').style.display='none';
+  document.getElementById('mr-marg').textContent='—';
+  document.getElementById('mr-marg').style.color='var(--mu2)';
+  document.getElementById('mr-fb').style.display='none';
+  document.getElementById('mr-acl').style.display='none';
+  if(id){
+    var r=DB.repuestos.find(function(x){return x.id===id;});
+    if(r){
+      document.getElementById('mr-nom').value=r.nombre||'';
+      document.getElementById('mr-cat').value=r.categoria||'CUCHILLAS';
+      document.getElementById('mr-prov').value=r.proveedor||'';
+      document.getElementById('mr-mon').value=r.moneda||'COP';
+      document.getElementById('mr-pc').value=r.precioCompra||0;
+      document.getElementById('mr-trm').value=r.trm||DB.config.trmCompra;
+      document.getElementById('mr-stk').value=r.stockActual||0;
+      document.getElementById('mr-smin').value=r.stockMin||1;
+      document.getElementById('mr-pv').value=r.precioVenta||0;
+      onMonRep(); calcMargRep();
+    }
+  } else {
+    document.getElementById('mr-trm').value=DB.config.trmCompra;
+    document.getElementById('mr-smin').value=DB.config.stockMin;
+  }
+  abrir('m-rep');
+}
+
+function acRep(q){
+  var list=document.getElementById('mr-acl');
+  if(editRepId){list.style.display='none';return;}
+  q=(q||'').trim();
+  if(!q){list.style.display='none';return;}
+  var hits=DB.repuestos.filter(function(r){return r.nombre.toLowerCase().indexOf(q.toLowerCase())>=0;});
+  if(!hits.length){list.style.display='none';return;}
+  var emo={CUCHILLAS:'🔪',PLOTTER:'🖨️',TINTAS:'🖋️',CABEZALES:'⚙️','IMPRE LATEX':'🖨️',OTRO:'📦'};
+  list.innerHTML=hits.map(function(r){
+    var em=emo[r.categoria]||'📦';
+    var i=r.nombre.toLowerCase().indexOf(q.toLowerCase());
+    var hl=r.nombre.slice(0,i)+'<mark>'+r.nombre.slice(i,i+q.length)+'</mark>'+r.nombre.slice(i+q.length);
+    return '<div class="aci" onclick="fillRep(\''+r.id+'\')" ><div class="acii">'+em+'</div><div class="acin"><div class="an">'+hl+'</div><div class="as">'+r.categoria+' · '+( r.proveedor||'—')+' · Stock: '+r.stockActual+'</div></div><div class="acp">'+fK(r.precioVenta)+'</div></div>';
+  }).join('');
+  list.style.display='block';
+}
+
+function fillRep(id){
+  var r=DB.repuestos.find(function(x){return x.id===id;}); if(!r)return;
+  document.getElementById('mr-nom').value=r.nombre;
+  document.getElementById('mr-cat').value=r.categoria||'CUCHILLAS';
+  document.getElementById('mr-prov').value=r.proveedor||'';
+  document.getElementById('mr-mon').value=r.moneda||'COP';
+  document.getElementById('mr-pc').value=r.precioCompra||0;
+  document.getElementById('mr-trm').value=r.trm||DB.config.trmCompra;
+  document.getElementById('mr-stk').value=r.stockActual||0;
+  document.getElementById('mr-smin').value=r.stockMin||1;
+  document.getElementById('mr-pv').value=r.precioVenta||0;
+  document.getElementById('mr-acl').style.display='none';
+  document.getElementById('mr-fbn').textContent=r.nombre;
+  document.getElementById('mr-fb').style.display='flex';
+  editRepId=r.id;
+  document.getElementById('mr-tit').textContent='Editar Repuesto';
+  onMonRep(); calcMargRep();
+}
+
+function onMonRep(){
+  var m=document.getElementById('mr-mon').value;
+  document.getElementById('mr-pcl').textContent=m==='USD'?'Precio compra (USD)':'Precio compra (COP)';
+  document.getElementById('mr-trmw').style.display=m==='USD'?'block':'none';
+  if(m==='USD') document.getElementById('mr-trm').value=DB.config.trmCompra;
+  calcMargRep();
+}
+
+function getCostoCOP(){
+  var m=document.getElementById('mr-mon').value;
+  var pc=+document.getElementById('mr-pc').value||0;
+  var trm=+document.getElementById('mr-trm').value||DB.config.trmCompra;
+  return m==='USD'?pc*trm:pc;
+}
+
+function calcMargRep(){
+  var c=getCostoCOP();
+  document.getElementById('mr-hint').textContent='COP: '+fCOP(c);
+  var pv=+document.getElementById('mr-pv').value||0;
+  var el=document.getElementById('mr-marg');
+  if(pv>0&&c>0){
+    var m=((pv-c)/pv*100).toFixed(1);
+    el.textContent=m+'%';
+    el.style.color=+m>=DB.config.margenObj?'var(--gr)':'var(--yw)';
+  } else { el.textContent='—'; el.style.color='var(--mu2)'; }
+}
+
+function guardarRep(){
+  var nom=document.getElementById('mr-nom').value.trim();
+  if(!nom){toast('⚠️ El nombre es requerido');return;}
+  var mon=document.getElementById('mr-mon').value;
+  var pc=+document.getElementById('mr-pc').value||0;
+  var trm=mon==='USD'?(+document.getElementById('mr-trm').value||DB.config.trmCompra):1;
+  var cop=mon==='USD'?pc*trm:pc;
+  var pv=+document.getElementById('mr-pv').value||0;
+  var r={
+    id:editRepId||'REP-'+Date.now(), nombre:nom,
+    categoria:document.getElementById('mr-cat').value,
+    proveedor:document.getElementById('mr-prov').value.trim(),
+    moneda:mon, precioCompra:pc, trm:trm, costoCOP:cop, precioVenta:pv,
+    stockActual:+document.getElementById('mr-stk').value||0,
+    stockMin:+document.getElementById('mr-smin').value||1,
+    margen:pv>0&&cop>0?(pv-cop)/pv:0
+  };
+  if(editRepId){ var i=DB.repuestos.findIndex(function(x){return x.id===editRepId;}); if(i>-1)DB.repuestos[i]=r; }
+  else DB.repuestos.push(r);
+  save(); cerrar('m-rep'); renderInv(); renderDash();
+  toast(editRepId?'✅ Repuesto actualizado':'✅ Repuesto agregado');
+}
+
+function renderInv(){
+  var q=(document.getElementById('s-rep')||{value:''}).value.toLowerCase().trim();
+  var lista=DB.repuestos.filter(function(r){
+    return !q||r.nombre.toLowerCase().indexOf(q)>=0||r.categoria.toLowerCase().indexOf(q)>=0||(r.proveedor||'').toLowerCase().indexOf(q)>=0;
+  });
+  var div=document.getElementById('l-inv');
+  if(!lista.length){div.innerHTML='<div class="empty"><span>🔩</span><p>No se encontraron repuestos.</p></div>';return;}
+  div.innerHTML=lista.map(function(r){
+    var m=r.precioVenta>0&&r.costoCOP>0?((r.precioVenta-r.costoCOP)/r.precioVenta*100).toFixed(1):0;
+    var sc=r.stockActual===0?'stk-no':r.stockActual<=r.stockMin?'stk-low':'stk-ok';
+    var st=r.stockActual===0?'🔴 Sin stock':r.stockActual<=r.stockMin?'🟡 Stock bajo':'🟢 OK';
+    var gu=r.precioVenta-r.costoCOP;
+    return '<div class="rc"><div class="rt"><div class="rn">'+r.nombre+'</div><div class="badge '+sc+'">'+st+'</div></div>'+
+      '<div class="rm"><span class="rmc">📦 '+r.categoria+'</span><span class="rmc">🏪 '+(r.proveedor||'—')+'</span><span class="rmc">'+(r.moneda==='USD'?'🇺🇸 USD':'🇨🇴 COP')+'</span></div>'+
+      '<div class="pr"><div class="pb"><div class="pbl">Stock</div><div class="pbv pbo">'+r.stockActual+' uds</div></div><div class="pb"><div class="pbl">Costo COP</div><div class="pbv">'+fK(r.costoCOP)+'</div></div><div class="pb"><div class="pbl">Venta COP</div><div class="pbv pbo">'+fK(r.precioVenta)+'</div></div></div>'+
+      '<div style="font-size:12px;color:var(--gr);font-weight:600;margin-bottom:10px;">Margen: '+m+'% · Ganancia/u: '+fK(gu)+'</div>'+
+      '<div class="ra"><button class="btn btn-p btn-sm" onclick="abrirCompra(\''+r.id+'\')">🛒 Comprar</button><button class="btn btn-g btn-sm" onclick="abrirRep(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-d btn-sm" onclick="delRep(\''+r.id+'\')">🗑️</button></div></div>';
+  }).join('');
+}
+
+function delRep(id){ if(!confirm('¿Eliminar este repuesto?'))return; DB.repuestos=DB.repuestos.filter(function(r){return r.id!==id;}); save(); renderInv(); renderDash(); toast('🗑️ Eliminado'); }
+
+/* ══════════════════════════════════
+   COMPRAS
+══════════════════════════════════ */
+function abrirCompra(repId){
+  cRepId=repId||null;
+  ['mc-nom','mc-prov','mc-not'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('mc-cant').value='1';
+  document.getElementById('mc-pre').value='';
+  document.getElementById('mc-mon').value='COP';
+  document.getElementById('mc-trm').value=DB.config.trmCompra;
+  document.getElementById('mc-trmw').style.display='none';
+  document.getElementById('mc-pl').textContent='Precio unitario (COP)';
+  document.getElementById('mc-badge').style.display='none';
+  document.getElementById('mc-res').style.display='none';
+  document.getElementById('mc-acl').style.display='none';
+  document.getElementById('mc-rid').value='';
+  document.getElementById('mc-fec').value=new Date().toISOString().split('T')[0];
+  document.getElementById('mc-tit').textContent='Nueva Compra';
+  if(repId){
+    var r=DB.repuestos.find(function(x){return x.id===repId;});
+    if(r){
+      document.getElementById('mc-nom').value=r.nombre;
+      document.getElementById('mc-rid').value=r.id;
+      document.getElementById('mc-prov').value=r.proveedor||'';
+      document.getElementById('mc-mon').value=r.moneda||'COP';
+      document.getElementById('mc-pre').value=r.precioCompra||0;
+      document.getElementById('mc-trm').value=r.trm||DB.config.trmCompra;
+      document.getElementById('mc-bnom').textContent=r.nombre;
+      document.getElementById('mc-badge').style.display='flex';
+      document.getElementById('mc-tit').textContent='Compra: '+r.nombre;
+      onMonComp(); calcComp();
+    }
+  }
+  abrir('m-comp');
+}
+
+function acComp(q){
+  var list=document.getElementById('mc-acl');
+  q=(q||'').trim();
+  if(!q){list.style.display='none';return;}
+  var hits=DB.repuestos.filter(function(r){return r.nombre.toLowerCase().indexOf(q.toLowerCase())>=0;});
+  if(!hits.length){list.style.display='none';return;}
+  var emo={CUCHILLAS:'🔪',PLOTTER:'🖨️',TINTAS:'🖋️',CABEZALES:'⚙️','IMPRE LATEX':'🖨️',OTRO:'📦'};
+  list.innerHTML=hits.map(function(r){
+    var em=emo[r.categoria]||'📦';
+    var i=r.nombre.toLowerCase().indexOf(q.toLowerCase());
+    var hl=r.nombre.slice(0,i)+'<mark>'+r.nombre.slice(i,i+q.length)+'</mark>'+r.nombre.slice(i+q.length);
+    return '<div class="aci" onclick="fillComp(\''+r.id+'\')"><div class="acii">'+em+'</div><div class="acin"><div class="an">'+hl+'</div><div class="as">Stock: '+r.stockActual+' · Costo: '+fCOP(r.costoCOP)+'</div></div><div class="acp">'+fK(r.precioVenta)+'</div></div>';
+  }).join('');
+  list.style.display='block';
+}
+
+function fillComp(id){
+  var r=DB.repuestos.find(function(x){return x.id===id;}); if(!r)return;
+  cRepId=id;
+  document.getElementById('mc-nom').value=r.nombre;
+  document.getElementById('mc-rid').value=r.id;
+  document.getElementById('mc-prov').value=r.proveedor||'';
+  document.getElementById('mc-mon').value=r.moneda||'COP';
+  document.getElementById('mc-pre').value=r.precioCompra||0;
+  document.getElementById('mc-trm').value=r.trm||DB.config.trmCompra;
+  document.getElementById('mc-acl').style.display='none';
+  document.getElementById('mc-bnom').textContent=r.nombre;
+  document.getElementById('mc-badge').style.display='flex';
+  document.getElementById('mc-tit').textContent='Compra: '+r.nombre;
+  onMonComp(); calcComp();
+}
+
+function onMonComp(){
+  var m=document.getElementById('mc-mon').value;
+  document.getElementById('mc-pl').textContent=m==='USD'?'Precio unitario (USD)':'Precio unitario (COP)';
+  document.getElementById('mc-trmw').style.display=m==='USD'?'block':'none';
+  if(m==='USD') document.getElementById('mc-trm').value=DB.config.trmCompra;
+  calcComp();
+}
+
+function calcComp(){
+  var cant=+document.getElementById('mc-cant').value||1;
+  var pre=+document.getElementById('mc-pre').value||0;
+  var mon=document.getElementById('mc-mon').value;
+  var trm=+document.getElementById('mc-trm').value||DB.config.trmCompra;
+  var cop=mon==='USD'?pre*trm:pre;
+  var tot=cop*cant;
+  document.getElementById('mc-hint').textContent='Total COP: '+fCOP(tot);
+  var rid=document.getElementById('mc-rid').value;
+  var r=DB.repuestos.find(function(x){return x.id===rid;});
+  var sf=r?(r.stockActual||0)+cant:cant;
+  document.getElementById('mc-res').style.display=pre>0?'block':'none';
+  document.getElementById('mc-rc').textContent=cant+' uds';
+  document.getElementById('mc-rp').textContent=fCOP(cop);
+  document.getElementById('mc-rt').textContent=fCOP(tot);
+  document.getElementById('mc-rs').textContent=sf+' uds';
+}
+
+function guardarComp(){
+  var nom=document.getElementById('mc-nom').value.trim();
+  var prov=document.getElementById('mc-prov').value.trim();
+  var cant=+document.getElementById('mc-cant').value||1;
+  var pre=+document.getElementById('mc-pre').value||0;
+  var mon=document.getElementById('mc-mon').value;
+  var trm=+document.getElementById('mc-trm').value||DB.config.trmCompra;
+  var cop=mon==='USD'?pre*trm:pre;
+  var tot=cop*cant;
+  if(!nom){toast('⚠️ Escribe el nombre del repuesto');return;}
+  if(!pre){toast('⚠️ Ingresa el precio unitario');return;}
+  var rid=document.getElementById('mc-rid').value;
+  var r=DB.repuestos.find(function(x){return x.id===rid;});
+  if(!r){
+    r={id:'REP-'+Date.now(),nombre:nom,categoria:'OTRO',proveedor:prov,moneda:mon,precioCompra:pre,trm:mon==='USD'?trm:1,costoCOP:cop,precioVenta:0,stockActual:cant,stockMin:DB.config.stockMin,margen:0};
+    DB.repuestos.push(r);
+  } else {
+    r.stockActual=(r.stockActual||0)+cant;
+    r.precioCompra=pre; r.trm=mon==='USD'?trm:1; r.costoCOP=cop; r.moneda=mon;
+    if(prov) r.proveedor=prov;
+  }
+  DB.compras.unshift({
+    id:'CMP-'+Date.now(), fecha:document.getElementById('mc-fec').value,
+    repId:r.id, producto:nom, proveedor:prov||r.proveedor||'—',
+    cantidad:cant, moneda:mon, precioUnitario:pre, trm:mon==='USD'?trm:1,
+    precCOP:cop, totalCOP:tot, notas:document.getElementById('mc-not').value.trim()
+  });
+  save(); cerrar('m-comp'); renderComp(); renderInv(); renderDash();
+  toast('✅ Compra registrada · Stock: '+r.stockActual+' uds');
+}
+
+function filtC(f,tab){
+  filtComp=f;
+  [].forEach.call(document.querySelectorAll('#scr-compras .tab'), function(t){t.classList.remove('on');});
+  tab.classList.add('on');
+  renderComp();
+}
+
+function renderComp(){
+  var hoy=new Date();
+  var lista=DB.compras.slice().sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+  if(filtComp==='mes') lista=lista.filter(function(c){var d=new Date(c.fecha+'T12:00:00');return d.getMonth()===hoy.getMonth()&&d.getFullYear()===hoy.getFullYear();});
+  var div=document.getElementById('l-comp');
+  if(!lista.length){div.innerHTML='<div class="empty"><span>🛒</span><p>No hay compras registradas.<br>Toca "+ Compra" para comenzar.</p></div>';return;}
+  var grupos={};
+  lista.forEach(function(c){
+    var d=new Date(c.fecha+'T12:00:00');
+    var k=d.getFullYear()+'-'+String(d.getMonth()).padStart(2,'0');
+    var lbl=d.toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    if(!grupos[k]){grupos[k]={lbl:lbl,items:[],tot:0};}
+    grupos[k].items.push(c); grupos[k].tot+=c.totalCOP||0;
+  });
+  div.innerHTML=Object.keys(grupos).sort().reverse().map(function(k){
+    var g=grupos[k];
+    return '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:capitalize;">'+g.lbl+'</div><div style="font-size:11px;color:var(--ac);">Invertido: '+fCOP(g.tot)+'</div></div>'+
+      g.items.map(function(c){
+        var r=DB.repuestos.find(function(x){return x.id===c.repId;});
+        return '<div class="cc"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;"><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+c.producto+'</div><div style="font-size:11px;color:var(--mu2);margin-bottom:6px;">📅 '+fF(c.fecha)+' · 🏪 '+c.proveedor+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;"><span style="background:var(--bg4);border:1px solid rgba(255,255,255,.07);border-radius:var(--r99);padding:3px 9px;font-size:10px;font-weight:600;">+'+c.cantidad+' uds</span><span style="background:var(--acbg);border:1px solid var(--acbd);border-radius:var(--r99);padding:3px 9px;font-size:10px;font-weight:600;color:var(--ac);">'+fCOP(c.precCOP)+'/u'+(c.moneda==='USD'?' (USD @'+c.trm+')':'')+'</span>'+(c.notas?'<span style="background:var(--bg4);border:1px solid rgba(255,255,255,.07);border-radius:var(--r99);padding:3px 9px;font-size:10px;color:var(--mu);">'+c.notas+'</span>':'')+'</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;color:var(--ac);">'+fCOP(c.totalCOP)+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px;">Stock hoy: '+(r?r.stockActual:'?')+' uds</div></div></div></div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════
+   VENTAS
+══════════════════════════════════ */
+function abrirVenta(){
+  document.getElementById('mv-fec').value=new Date().toISOString().split('T')[0];
+  document.getElementById('mv-cli').value='';
+  document.getElementById('mv-cant').value='1';
+  document.getElementById('mv-pre').value='';
+  ['vr-tot','vr-gan'].forEach(function(id){document.getElementById(id).textContent='$0';});
+  document.getElementById('vr-cos').textContent='$0';
+  document.getElementById('vr-mar').textContent='0%';
+  var sel=document.getElementById('mv-rep');
+  sel.innerHTML='<option value="">Seleccionar...</option>';
+  DB.repuestos.filter(function(r){return r.stockActual>0;}).forEach(function(r){
+    sel.innerHTML+='<option value="'+r.id+'">'+r.nombre+' · Stock: '+r.stockActual+'</option>';
+  });
+  if(!DB.repuestos.filter(function(r){return r.stockActual>0;}).length){toast('⚠️ No hay repuestos con stock');return;}
+  abrir('m-vent');
+}
+
+function onRepVent(){
+  var r=DB.repuestos.find(function(x){return x.id===document.getElementById('mv-rep').value;});
+  if(r) document.getElementById('mv-pre').value=r.precioVenta;
+  calcVent();
+}
+
+function calcVent(){
+  var id=document.getElementById('mv-rep').value;
+  var r=DB.repuestos.find(function(x){return x.id===id;});
+  var cant=+document.getElementById('mv-cant').value||1;
+  var pre=+document.getElementById('mv-pre').value||0;
+  var tot=cant*pre, cos=r?(r.costoCOP||0)*cant:0, gan=tot-cos, mar=tot>0?((gan/tot)*100).toFixed(1):0;
+  document.getElementById('vr-tot').textContent=fCOP(tot);
+  document.getElementById('vr-cos').textContent=fCOP(cos);
+  document.getElementById('vr-gan').textContent=fCOP(gan);
+  document.getElementById('vr-mar').textContent=mar+'%';
+}
+
+function guardarVent(){
+  var rid=document.getElementById('mv-rep').value;
+  var r=DB.repuestos.find(function(x){return x.id===rid;});
+  if(!rid||!r){toast('⚠️ Selecciona un repuesto');return;}
+  var cant=+document.getElementById('mv-cant').value||1;
+  var pre=+document.getElementById('mv-pre').value||0;
+  if(!pre){toast('⚠️ Ingresa el precio de venta');return;}
+  if(cant>r.stockActual){toast('⚠️ Stock insuficiente (disponible: '+r.stockActual+')');return;}
+  var tot=cant*pre, cos=(r.costoCOP||0)*cant, gan=tot-cos, mar=tot>0?gan/tot:0;
+  DB.ventas.unshift({id:'VTA-'+Date.now(),fecha:document.getElementById('mv-fec').value,repId:rid,producto:r.nombre,cliente:document.getElementById('mv-cli').value.trim(),cantidad:cant,precioVenta:pre,totalVenta:tot,costoPromedio:r.costoCOP||0,gananciaReal:gan,margenReal:mar});
+  r.stockActual=Math.max(0,r.stockActual-cant);
+  save(); cerrar('m-vent'); renderVent(); renderInv(); renderDash(); toast('✅ Venta registrada');
+}
+
+function renderVent(){
+  var div=document.getElementById('l-vent');
+  if(!DB.ventas.length){div.innerHTML='<div class="empty"><span>💰</span><p>No hay ventas registradas.</p></div>';return;}
+  var grupos={};
+  DB.ventas.forEach(function(v){
+    var d=new Date(v.fecha+'T12:00:00');
+    var k=d.getFullYear()+'-'+String(d.getMonth()).padStart(2,'0');
+    var lbl=d.toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    if(!grupos[k]){grupos[k]={lbl:lbl,items:[],gan:0};}
+    grupos[k].items.push(v); grupos[k].gan+=v.gananciaReal||0;
+  });
+  div.innerHTML=Object.keys(grupos).sort().reverse().map(function(k){
+    var g=grupos[k];
+    return '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;"><div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:capitalize;">'+g.lbl+'</div><div style="font-size:11px;color:var(--gr);">+'+fCOP(g.gan)+' ganancia</div></div>'+
+      g.items.map(function(v){
+        return '<div class="vc"><div class="vl"><div class="vp">'+v.producto+'</div><div class="vm">'+fF(v.fecha)+(v.cliente?' · '+v.cliente:'')+(v.cantidad>1?' · x'+v.cantidad:'')+'</div></div><div class="vr2"><div class="vt">'+fCOP(v.totalVenta)+'</div><div class="vg">+'+fCOP(v.gananciaReal)+'</div><div class="vmr">'+((v.margenReal||0)*100).toFixed(1)+'% margen</div></div></div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════
+   CONFIGURACIÓN TRM
+══════════════════════════════════ */
+function updTrm(){
+  document.getElementById('trm-c').textContent='$'+DB.config.trmCompra.toLocaleString('es-CO');
+  document.getElementById('trm-v').textContent='$'+DB.config.trmVenta.toLocaleString('es-CO');
+  document.getElementById('trm-sm').textContent=DB.config.stockMin;
+}
+function abrirCfg(){
+  document.getElementById('cfg-tc').value=DB.config.trmCompra;
+  document.getElementById('cfg-tv').value=DB.config.trmVenta;
+  document.getElementById('cfg-sm').value=DB.config.stockMin;
+  document.getElementById('cfg-mo').value=DB.config.margenObj;
+  abrir('m-cfg');
+}
+function guardarCfg(){
+  DB.config.trmCompra=+document.getElementById('cfg-tc').value||3700;
+  DB.config.trmVenta=+document.getElementById('cfg-tv').value||3950;
+  DB.config.stockMin=+document.getElementById('cfg-sm').value||3;
+  DB.config.margenObj=+document.getElementById('cfg-mo').value||40;
+  save(); updTrm(); cerrar('m-cfg'); toast('✅ Configuración guardada');
+}
+
+/* ══════════════════════════════════
+   AUTOCOMPLETE CLOSE
+══════════════════════════════════ */
+document.addEventListener('click',function(e){
+  [].forEach.call(document.querySelectorAll('.acl'), function(l){
+    var w=l.closest('.acw');
+    if(w&&!w.contains(e.target)) l.style.display='none';
+  });
+});
+
+/* ══════════════════════════════════
+   EXPORTAR EXCEL
+══════════════════════════════════ */
+function buildCSV(){
+  var hoy=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  var csv='\uFEFFsep=;\nESCUDERO INGENIERÍA ESPECIALIZADA\nGenerado: '+hoy+'\n\n';
+  csv+='SERVICIOS\nID;Cliente;Empresa;Fecha;Hora;Equipo;Tipo;Valor COP;Estado;Gastos;Neto\n';
+  DB.servicios.forEach(function(s){
+    var tg=(s.gastos||[]).reduce(function(a,g){return a+(+g.monto||0);},0);
+    csv+=s.id+';"'+(s.cliente||'').replace(/"/g,'""')+'";'
+      +'"'+(s.empresa||'').replace(/"/g,'""')+'";'
+      +(s.fecha||'')+';'+(s.hora||'')+';'
+      +'"'+(s.equipo||'').replace(/"/g,'""')+'";'
+      +(s.tipo||'')+';'+(s.valor||0)+';'+(s.pago||'')+';'+tg+';'+((s.valor||0)-tg)+'\n';
+  });
+  csv+='\nCOMPRAS\nID;Fecha;Producto;Proveedor;Cantidad;Moneda;Precio unitario;Precio COP;Total COP;TRM;Notas\n';
+  DB.compras.forEach(function(co){
+    csv+=co.id+';'+(co.fecha||'')+';"'+(co.producto||'').replace(/"/g,'""')+'";'
+      +'"'+(co.proveedor||'').replace(/"/g,'""')+'";'
+      +(co.cantidad||0)+';'+(co.moneda||'COP')+';'+(co.precioUnitario||0)+';'
+      +(co.precCOP||0)+';'+(co.totalCOP||0)+';'+(co.trm||1)+';"'+(co.notas||'').replace(/"/g,'""')+'"\n';
+  });
+  csv+='\nINVENTARIO\nID;Nombre;Categoria;Proveedor;Moneda;Precio compra;TRM;Costo COP;Precio venta;Stock;Stock min;Margen%;Ganancia/u\n';
+  DB.repuestos.forEach(function(r){
+    var m=r.precioVenta>0&&r.costoCOP>0?((r.precioVenta-r.costoCOP)/r.precioVenta*100).toFixed(1):0;
+    csv+=r.id+';"'+(r.nombre||'').replace(/"/g,'""')+'";'+(r.categoria||'')+';'
+      +'"'+(r.proveedor||'').replace(/"/g,'""')+'";'
+      +(r.moneda||'COP')+';'+(r.precioCompra||0)+';'+(r.trm||1)+';'+(r.costoCOP||0)+';'
+      +(r.precioVenta||0)+';'+(r.stockActual||0)+';'+(r.stockMin||0)+';'+m+'%;'+((r.precioVenta||0)-(r.costoCOP||0))+'\n';
+  });
+  csv+='\nVENTAS\nID;Fecha;Producto;Cliente;Cantidad;Precio venta;Total;Costo;Ganancia;Margen%\n';
+  DB.ventas.forEach(function(v){
+    csv+=v.id+';'+(v.fecha||'')+';"'+(v.producto||'').replace(/"/g,'""')+'";'
+      +'"'+(v.cliente||'').replace(/"/g,'""')+'";'
+      +(v.cantidad||0)+';'+(v.precioVenta||0)+';'+(v.totalVenta||0)+';'
+      +((v.costoPromedio||0)*(v.cantidad||0))+';'+(v.gananciaReal||0)+';'+((v.margenReal||0)*100).toFixed(1)+'%\n';
+  });
+  return csv;
+}
+
+function expExcel(){
+  _csv=buildCSV();
+  document.getElementById('csv-area').value=_csv;
+  abrir('m-excel');
+}
+function copCSV(){
+  var a=document.getElementById('csv-area');
+  a.select();
+  try{ a.setSelectionRange(0,99999); }catch(e){}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(a.value).then(function(){
+      toast('✅ Copiado al portapapeles');
+    }).catch(function(){
+      try{ document.execCommand('copy'); toast('✅ Copiado'); }
+      catch(e2){ toast('⚠️ Texto seleccionado — ahora toca Copiar'); }
+    });
+  } else {
+    try{ document.execCommand('copy'); toast('✅ Copiado al portapapeles'); }
+    catch(e){ toast('⚠️ Texto seleccionado — ahora toca Copiar'); }
+  }
+}
+function dlCSV(){
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(_csv);
+  a.download='Escudero_'+new Date().toISOString().split('T')[0]+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('📊 Descargando CSV...');
+}
+
+/* ══════════════════════════════════
+   EXPORTAR PDF
+══════════════════════════════════ */
+function buildPDFHTML(){
+  var hoy=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  var ts=DB.servicios.filter(function(s){return s.pago==='pagado';}).reduce(function(a,s){return a+(+s.valor||0);},0);
+  var td=DB.servicios.filter(function(s){return s.pago==='debe';}).reduce(function(a,s){return a+(+s.valor||0);},0);
+  var tv=DB.ventas.reduce(function(a,v){return a+(+v.totalVenta||0);},0);
+  var tg=DB.ventas.reduce(function(a,v){return a+(+v.gananciaReal||0);},0);
+  var tc=DB.compras.reduce(function(a,c){return a+(+c.totalCOP||0);},0);
+  var css='*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;background:#F5F7FF;color:#111;font-size:11px;padding:14px}.hdr{background:linear-gradient(135deg,#07111F,#162540);color:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px}.hdr h1{font-size:17px;font-weight:900;color:#F4841E;text-transform:uppercase}.hdr p{font-size:9px;opacity:.5;margin-top:2px}.krow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}.kb{background:#fff;border-radius:7px;padding:9px;border-top:2px solid #E8751A}.kv{font-size:15px;font-weight:900;color:#E8751A}.kl{font-size:8px;color:#888;text-transform:uppercase;margin-top:1px}h3{font-size:11px;font-weight:900;color:#07111F;text-transform:uppercase;margin:8px 0 4px;border-bottom:1px solid #E8751A;padding-bottom:2px}table{width:100%;border-collapse:collapse;margin-bottom:8px;background:#fff}th{background:#07111F;color:#fff;padding:4px 6px;text-align:left;font-size:8px;font-weight:700;text-transform:uppercase}td{padding:3px 6px;border-bottom:1px solid #EEF2FF;font-size:9px}.bp{background:#D1FAE5;color:#065F46;padding:1px 5px;border-radius:99px;font-size:7px;font-weight:700}.bd{background:#FEE2E2;color:#991B1B;padding:1px 5px;border-radius:99px;font-size:7px;font-weight:700}.bpe{background:#FEF3C7;color:#92400E;padding:1px 5px;border-radius:99px;font-size:7px;font-weight:700}';
+  var rServ=DB.servicios.map(function(s){var bc=s.pago==='pagado'?'bp':s.pago==='debe'?'bd':'bpe';var bt=s.pago==='pagado'?'Pagado':s.pago==='debe'?'Debe':'Pendiente';var tg2=(s.gastos||[]).reduce(function(a,g){return a+(+g.monto||0);},0);return'<tr><td><b>'+(s.cliente||'')+'</b></td><td>'+(s.empresa||'—')+'</td><td>'+fF(s.fecha)+'</td><td>'+(s.equipo||'—')+'</td><td>'+(s.tipo||'—')+'</td><td><b>'+fCOP(s.valor)+'</b></td><td>'+(tg2?'-'+fCOP(tg2):'—')+'</td><td><span class="'+bc+'">'+bt+'</span></td></tr>';}).join('');
+  var rComp=DB.compras.map(function(c){return'<tr><td>'+fF(c.fecha)+'</td><td><b>'+(c.producto||'')+'</b></td><td>'+(c.proveedor||'—')+'</td><td>'+c.cantidad+' uds</td><td>'+(c.moneda==='USD'?'USD '+c.precioUnitario+' @'+c.trm:'—')+'</td><td>'+fCOP(c.precCOP)+'</td><td><b>'+fCOP(c.totalCOP)+'</b></td><td>'+(c.notas||'—')+'</td></tr>';}).join('');
+  var rInv=DB.repuestos.map(function(r){var m=r.precioVenta>0&&r.costoCOP>0?((r.precioVenta-r.costoCOP)/r.precioVenta*100).toFixed(1):0;var sc=r.stockActual===0?'bd':r.stockActual<=r.stockMin?'bpe':'bp';return'<tr><td><b>'+(r.nombre||'')+'</b></td><td>'+r.categoria+'</td><td>'+(r.proveedor||'—')+'</td><td>'+fCOP(r.costoCOP)+'</td><td>'+fCOP(r.precioVenta)+'</td><td>'+m+'%</td><td><span class="'+sc+'">'+(r.stockActual||0)+' uds</span></td></tr>';}).join('');
+  var rVent=DB.ventas.map(function(v){return'<tr><td>'+fF(v.fecha)+'</td><td><b>'+(v.producto||'')+'</b></td><td>'+(v.cliente||'—')+'</td><td>'+v.cantidad+'</td><td>'+fCOP(v.precioVenta)+'</td><td><b>'+fCOP(v.totalVenta)+'</b></td><td style="color:#065F46;font-weight:700">'+fCOP(v.gananciaReal)+'</td><td>'+((v.margenReal||0)*100).toFixed(1)+'%</td></tr>';}).join('');
+  return'<style>'+css+'</style>'
+    +'<div class="hdr"><h1>⚙️ Escudero Ingeniería Especializada</h1><p>Reporte · '+hoy+'</p></div>'
+    +'<div class="krow"><div class="kb"><div class="kv">'+DB.servicios.length+'</div><div class="kl">Servicios</div></div><div class="kb"><div class="kv">'+fCOP(ts)+'</div><div class="kl">Cobrado</div></div><div class="kb"><div class="kv">'+fCOP(td)+'</div><div class="kl">Por cobrar</div></div><div class="kb"><div class="kv">'+DB.compras.length+'</div><div class="kl">Compras</div></div><div class="kb"><div class="kv">'+fCOP(tc)+'</div><div class="kl">Invertido</div></div><div class="kb"><div class="kv">'+fCOP(tg)+'</div><div class="kl">Ganancia</div></div></div>'
+    +(DB.servicios.length?'<h3>Servicios</h3><table><tr><th>Cliente</th><th>Empresa</th><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Valor</th><th>Gastos</th><th>Estado</th></tr>'+rServ+'</table>':'')
+    +(DB.compras.length?'<h3>Compras</h3><table><tr><th>Fecha</th><th>Producto</th><th>Proveedor</th><th>Cant.</th><th>USD/TRM</th><th>Precio COP</th><th>Total</th><th>Notas</th></tr>'+rComp+'</table>':'')
+    +(DB.repuestos.length?'<h3>Inventario</h3><table><tr><th>Repuesto</th><th>Categoría</th><th>Proveedor</th><th>Costo</th><th>Venta</th><th>Margen</th><th>Stock</th></tr>'+rInv+'</table>':'')
+    +(DB.ventas.length?'<h3>Ventas</h3><table><tr><th>Fecha</th><th>Producto</th><th>Cliente</th><th>Cant.</th><th>Precio</th><th>Total</th><th>Ganancia</th><th>Margen</th></tr>'+rVent+'</table>':'');
+}
+
+function expPDF(){
+  document.getElementById('pdf-body').innerHTML=buildPDFHTML();
+  abrir('m-pdf');
+}
+
+function imprimirPDF(){
+  var pa=document.getElementById('print-area');
+  pa.innerHTML=buildPDFHTML();
+  pa.style.display='block';
+  try{ window.print(); }catch(e){ toast('⚠️ Impresión no disponible en esta vista — abre la app en Safari'); }
+  setTimeout(function(){ pa.innerHTML=''; pa.style.display='none'; },2000);
+}
+
+/* ══════════════════════════════════
+   INVENTARIO INICIAL
+══════════════════════════════════ */
+function seedInv(){
+  DB.repuestos=[
+    {id:'REP-0001',nombre:'KIT LLENAR CABEZALES',categoria:'CABEZALES',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:19000,trm:1,costoCOP:19000,precioVenta:90000,stockActual:3,stockMin:2},
+    {id:'REP-0002',nombre:'CUCHILLA CB09-45',categoria:'CUCHILLAS',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:46000,trm:1,costoCOP:46000,precioVenta:140000,stockActual:1,stockMin:2},
+    {id:'REP-0003',nombre:'CUCHILLA CB09-60',categoria:'CUCHILLAS',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:46000,trm:1,costoCOP:46000,precioVenta:140000,stockActual:2,stockMin:2},
+    {id:'REP-0004',nombre:'CUCHILLA CB15-30',categoria:'CUCHILLAS',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:46000,trm:1,costoCOP:46000,precioVenta:160000,stockActual:2,stockMin:2},
+    {id:'REP-0005',nombre:'CORREA CARRO PLOTTER GRAPHTEC',categoria:'PLOTTER',proveedor:'BARRANQUILLA',moneda:'COP',precioCompra:90000,trm:1,costoCOP:90000,precioVenta:185000,stockActual:1,stockMin:1},
+    {id:'REP-0006',nombre:'BANDA TEFLON GENERICA DELGADA',categoria:'PLOTTER',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:4000,trm:1,costoCOP:4000,precioVenta:60000,stockActual:1,stockMin:1},
+    {id:'REP-0007',nombre:'CORREA CARRO L26500-L110-L115',categoria:'IMPRE LATEX',proveedor:'ALIEXPRESS',moneda:'COP',precioCompra:160000,trm:1,costoCOP:160000,precioVenta:700000,stockActual:2,stockMin:1},
+    {id:'REP-0008',nombre:'TINTA MAGENTA 775M RECARGADA',categoria:'TINTAS',proveedor:'BARRANQUILLA',moneda:'COP',precioCompra:140000,trm:1,costoCOP:140000,precioVenta:300000,stockActual:0,stockMin:1},
+    {id:'REP-0009',nombre:'TINTA AMARILLA 775M RECARGADA',categoria:'TINTAS',proveedor:'BARRANQUILLA',moneda:'COP',precioCompra:140000,trm:1,costoCOP:140000,precioVenta:300000,stockActual:0,stockMin:1}
+  ];
+}
+
+init();
+</script>
+</body>
+</html>
