@@ -62,7 +62,7 @@ padding:3px 9px;border-radius:16px;
 .h-month{font-size:11px;font-weight:600;color:var(–fg3)}
 
 /* ══════ CONTENT AREA — with safe padding ══════ */
-.content{padding-bottom:calc(155px + var(–safe-bot))}
+.content{padding-bottom:calc(110px + var(–safe-bot))}
 
 /* ══════ NUDGE BAR ══════ */
 .nudge{
@@ -153,59 +153,30 @@ font-size:20px;background:var(–bg);border:1px solid var(–brd);
 .empty p{font-size:13px;line-height:1.7;font-weight:500}
 .empty b{color:var(–mint);font-weight:700}
 
-/* ══════ BOTTOM NAV ══════ */
-.bnav{
-position:fixed;z-index:90;
-left:12px;right:12px;
-bottom:calc(82px + var(–safe-bot));
-height:60px;
-background:rgba(21,28,44,.92);
-backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-border:1px solid var(–brd-hi);border-radius:16px;
-display:flex;
-box-shadow:0 -2px 20px rgba(0,0,0,.15);
-}
-.bnav button{
-flex:1;border:none;background:none;
-display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-color:var(–fg3);font-size:10px;font-weight:600;
-font-family:inherit;cursor:pointer;
-position:relative;transition:color .15s;
-padding:0;
-}
-.bnav button .ico{font-size:19px;line-height:1}
-.bnav button.active{color:var(–mint)}
-.bnav button.active::after{
-content:’’;position:absolute;bottom:6px;
-left:50%;transform:translateX(-50%);
-width:4px;height:4px;border-radius:50%;
-background:var(–mint);box-shadow:0 0 6px var(–mint);
-}
-
-/* ══════ INPUT BAR ══════ */
-.input-bar{
+/* ══════ BOTTOM PANEL (nav + input unified) ══════ */
+.bottom-panel{
 position:fixed;z-index:100;
 left:0;right:0;bottom:0;
 background:var(–surface);
 border-top:1px solid var(–brd-hi);
-padding:7px 12px calc(var(–safe-bot) + 5px);
+padding:6px 14px calc(var(–safe-bot) + 4px);
 }
-.input-row{display:flex;gap:8px;align-items:center}
-.input-row input{
-flex:1;height:46px;padding:0 15px;
+.bp-input{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+.bp-input input{
+flex:1;height:44px;padding:0 14px;
 background:var(–bg);
 border:1.5px solid var(–brd-hi);border-radius:12px;
 font:16px/1 ‘Plus Jakarta Sans’,sans-serif;
 font-weight:500;color:var(–fg);outline:none;
 transition:border-color .2s,box-shadow .2s;
 }
-.input-row input:focus{
+.bp-input input:focus{
 border-color:var(–mint);
 box-shadow:0 0 0 3px rgba(52,211,153,.08);
 }
-.input-row input::placeholder{color:var(–fg3);font-weight:400}
+.bp-input input::placeholder{color:var(–fg3);font-weight:400}
 .send-btn{
-width:46px;height:46px;border-radius:12px;flex-shrink:0;
+width:44px;height:44px;border-radius:12px;flex-shrink:0;
 background:linear-gradient(135deg,#34D399,#2BBF89);
 border:none;cursor:pointer;
 display:flex;align-items:center;justify-content:center;
@@ -214,13 +185,28 @@ transition:transform .1s;
 }
 .send-btn:active{transform:scale(.88)}
 .send-btn svg{width:18px;height:18px;fill:#0C111B}
-.input-hint{font-size:10px;color:var(–fg3);opacity:.4;text-align:center;margin-top:4px}
+.bp-nav{display:flex;height:44px}
+.bp-nav button{
+flex:1;border:none;background:none;
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+color:var(–fg3);font-size:10px;font-weight:600;
+font-family:inherit;cursor:pointer;
+position:relative;transition:color .15s;padding:0;
+}
+.bp-nav button .ico{font-size:18px;line-height:1}
+.bp-nav button.active{color:var(–mint)}
+.bp-nav button.active::after{
+content:’’;position:absolute;bottom:2px;
+left:50%;transform:translateX(-50%);
+width:4px;height:4px;border-radius:50%;
+background:var(–mint);box-shadow:0 0 6px var(–mint);
+}
 
 /* ══════ CONFIRM CARD ══════ */
 .cconfirm{
 position:fixed;z-index:110;
 left:12px;right:12px;
-bottom:calc(150px + var(–safe-bot));
+bottom:calc(108px + var(–safe-bot));
 background:var(–surface2);
 border:1.5px solid var(–mint);border-radius:14px;
 padding:14px;display:none;
@@ -396,23 +382,19 @@ pointer-events:none;
   </div>
 </div>
 
-<!-- NAV -->
+<!-- BOTTOM PANEL -->
 
-<div class="bnav">
-  <button class="active" onclick="nav('dash')" id="nb-dash"><span class="ico">📊</span>Inicio</button>
-  <button onclick="nav('hist')" id="nb-hist"><span class="ico">📋</span>Historial</button>
-  <button onclick="nav('ins')" id="nb-ins"><span class="ico">📈</span>Insights</button>
-  <button onclick="nav('cfg')" id="nb-cfg"><span class="ico">⚙️</span>Config</button>
-</div>
-
-<!-- INPUT -->
-
-<div class="input-bar">
-  <div class="input-row">
+<div class="bottom-panel">
+  <div class="bp-input">
     <input id="inp" type="text" placeholder="almuerzo 20k" enterkeyhint="send" autocomplete="off" autocapitalize="none">
     <button class="send-btn" onclick="submit()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
   </div>
-  <div class="input-hint">Escribe gasto + valor · Ej: gasolina 80</div>
+  <div class="bp-nav">
+    <button class="active" onclick="nav('dash')" id="nb-dash"><span class="ico">📊</span>Inicio</button>
+    <button onclick="nav('hist')" id="nb-hist"><span class="ico">📋</span>Historial</button>
+    <button onclick="nav('ins')" id="nb-ins"><span class="ico">📈</span>Insights</button>
+    <button onclick="nav('cfg')" id="nb-cfg"><span class="ico">⚙️</span>Config</button>
+  </div>
 </div>
 
 <!-- CONFIRM -->
@@ -699,7 +681,7 @@ function rCfg(){
 
 function nav(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
-  document.querySelectorAll('.bnav button').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.bp-nav button').forEach(el=>el.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('on');
   document.getElementById('nb-'+v).classList.add('active');
   window.scrollTo(0,0);
