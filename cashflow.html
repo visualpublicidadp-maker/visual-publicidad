@@ -214,18 +214,7 @@ transition:transform .1s;
 }
 .send-btn:active{transform:scale(.88)}
 .send-btn svg{width:18px;height:18px;fill:#0C111B}
-.acct-row{display:flex;gap:5px;margin-top:5px}
-.acct-btn{
-flex:1;padding:4px 0;border-radius:8px;
-border:1px solid var(–brd);background:none;
-font:11px/1 ‘Plus Jakarta Sans’,sans-serif;
-font-weight:600;color:var(–fg3);cursor:pointer;
-text-align:center;transition:all .12s;
-}
-.acct-btn.on{
-border-color:rgba(52,211,153,.25);
-color:var(–mint);background:var(–mint-soft);
-}
+.input-hint{font-size:10px;color:var(–fg3);opacity:.4;text-align:center;margin-top:4px}
 
 /* ══════ CONFIRM CARD ══════ */
 .cconfirm{
@@ -423,10 +412,7 @@ pointer-events:none;
     <input id="inp" type="text" placeholder="almuerzo 20k" enterkeyhint="send" autocomplete="off" autocapitalize="none">
     <button class="send-btn" onclick="submit()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
   </div>
-  <div class="acct-row">
-    <button class="acct-btn on" id="ab-p" onclick="setAcct('personal')">👤 Personal</button>
-    <button class="acct-btn" id="ab-n" onclick="setAcct('negocio')">💼 Negocio</button>
-  </div>
+  <div class="input-hint">Escribe gasto + valor · Ej: gasolina 80</div>
 </div>
 
 <!-- CONFIRM -->
@@ -495,7 +481,7 @@ const FIJOS=[{n:'Bancolombia',v:1100000},{n:'Cuota carro',v:561000},{n:'Arriendo
 
 // State
 let D={items:[],learned:{},streak:{last:'',count:0}};
-let acct='personal',pendingItem=null,editingId=null;
+let pendingItem=null,editingId=null;
 
 // Storage
 function load(){try{const s=localStorage.getItem(KEY);if(s)D=JSON.parse(s)}catch(e){}if(!D||!D.items)D={items:[],learned:{},streak:{last:'',count:0}}}
@@ -539,15 +525,11 @@ function parse(raw){
   desc=desc.charAt(0).toUpperCase()+desc.slice(1);
   // Category
   const cat=findCat(desc,type);
-  // Account inference
-  let a=acct;const dl=desc.toLowerCase();
-  if(dl.match(/visual|escudero|repuesto|impresión|impresion/))a='negocio';
-  if(dl.match(/mercado|almuerzo|corrientazo|mamá|mama|arriendo|barbería|barberia/))a='personal';
   // Confidence
   if(cat.id==='otros')conf=0.5;
   if(desc.length<=2)conf=0.4;
 
-  return{id:'cf'+Date.now()+Math.random().toString(36).slice(2,5),desc,monto:amt,cat:cat.id,catE:cat.e,catN:cat.n,cuenta:a,metodo:method,tipo:type,fecha:new Date().toISOString(),mes:curMonth(),origen:'manual',confianza:conf};
+  return{id:'cf'+Date.now()+Math.random().toString(36).slice(2,5),desc,monto:amt,cat:cat.id,catE:cat.e,catN:cat.n,metodo:method,tipo:type,fecha:new Date().toISOString(),mes:curMonth(),origen:'manual',confianza:conf};
 }
 
 function findCat(desc,type){
@@ -575,7 +557,7 @@ function submit(){
 function showConfirm(p){
   document.getElementById('ccDesc').textContent=p.catE+' '+p.desc;
   document.getElementById('ccVal').textContent=(p.tipo==='ingreso'?'+':'-')+$(p.monto);
-  document.getElementById('ccTags').innerHTML=[p.catN,p.cuenta==='negocio'?'💼 Negocio':'👤 Personal',METHODS.find(m=>m.id===p.metodo)?.n].map(t=>'<span>'+t+'</span>').join('');
+  document.getElementById('ccTags').innerHTML=[p.catN,METHODS.find(m=>m.id===p.metodo)?.n].map(t=>'<span>'+t+'</span>').join('');
   document.getElementById('confirmCard').classList.add('show');
 }
 function confirmNo(){pendingItem=null;document.getElementById('confirmCard').classList.remove('show')}
@@ -608,7 +590,6 @@ function pickMet(mid){const it=D.items.find(x=>x.id===editingId);if(!it)return;i
 function removeItem(id){D.items=D.items.filter(x=>x.id!==id);save();closeSheet();renderAll();toast('Eliminado')}
 function closeSheet(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));editingId=null}
 
-function setAcct(a){acct=a;document.getElementById('ab-p').classList.toggle('on',a==='personal');document.getElementById('ab-n').classList.toggle('on',a==='negocio')}
 function toast(m,err){const t=document.getElementById('toast');t.textContent=m;t.className='toast vis '+(err?'fail':'suc');setTimeout(()=>t.className='toast',2500)}
 
 // ══════ RENDER ══════
@@ -664,7 +645,7 @@ function rDash(){
 function itemHTML(x,fresh){
   const sign=x.tipo==='ingreso'?'+':'-',cls=x.tipo==='ingreso'?'in':'out';
   const met=METHODS.find(m=>m.id===x.metodo);
-  return`<div class="ei${fresh?' fresh':''}" onclick="openEdit('${x.id}')"><div class="ei-icon">${x.catE}</div><div class="ei-body"><div class="ei-name">${x.desc}</div><div class="ei-tags"><span class="ei-tag">${x.catN}</span>${met?`<span class="ei-tag">${met.e} ${met.n}</span>`:''}${x.cuenta==='negocio'?'<span class="ei-tag">💼</span>':''}</div></div><div class="ei-right"><div class="ei-amount ${cls}">${sign}${$(x.monto)}</div><div class="ei-time">${ftime(x.fecha)}</div></div></div>`;
+  return`<div class="ei${fresh?' fresh':''}" onclick="openEdit('${x.id}')"><div class="ei-icon">${x.catE}</div><div class="ei-body"><div class="ei-name">${x.desc}</div><div class="ei-tags"><span class="ei-tag">${x.catN}</span>${met?`<span class="ei-tag">${met.e} ${met.n}</span>`:''}</div></div><div class="ei-right"><div class="ei-amount ${cls}">${sign}${$(x.monto)}</div><div class="ei-time">${ftime(x.fecha)}</div></div></div>`;
 }
 
 function rHist(){
@@ -687,8 +668,6 @@ function rIns(){
   const ct={};gastos.forEach(x=>{if(!ct[x.cat])ct[x.cat]={m:0,e:x.catE,n:x.catN};ct[x.cat].m+=x.monto});
   const top=Object.entries(ct).sort((a,b)=>b[1].m-a[1].m).slice(0,5),maxV=top.length?top[0][1].m:1;
   const avg=day?Math.round(tG/day):0,proj=avg*daysInMonth(),pct=PRESUP_VARIABLE?Math.round(tG/PRESUP_VARIABLE*100):0;
-  const gP=gastos.filter(x=>x.cuenta==='personal').reduce((s,x)=>s+x.monto,0);
-  const gN=gastos.filter(x=>x.cuenta==='negocio').reduce((s,x)=>s+x.monto,0);
   const mt={};gastos.forEach(x=>{if(!mt[x.metodo])mt[x.metodo]=0;mt[x.metodo]+=x.monto});
 
   let h=`<div class="ins-card"><h4>📊 Resumen</h4>
@@ -698,10 +677,6 @@ function rIns(){
     <div class="ins-row"><div class="il">⚡ Uso presupuesto variable</div><div class="iv" style="color:${pct>100?'var(--rose)':pct>75?'var(--amber)':'var(--mint)'}">${pct}%</div></div></div>`;
 
   if(top.length){h+=`<div class="ins-card"><h4>🏆 Top categorías</h4>`;top.forEach(([,c])=>{const p=Math.round(c.m/maxV*100);h+=`<div class="ins-row"><div class="il">${c.e} ${c.n}</div><div class="iv">${$(c.m)}</div></div><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:linear-gradient(90deg,var(--mint),var(--blue))"></div></div>`});h+=`</div>`}
-
-  h+=`<div class="ins-card"><h4>👤 Personal vs 💼 Negocio</h4>
-    <div class="ins-row"><div class="il">👤 Personal</div><div class="iv" style="color:var(--blue)">${$(gP)}</div></div>
-    <div class="ins-row"><div class="il">💼 Negocio</div><div class="iv" style="color:var(--violet)">${$(gN)}</div></div></div>`;
 
   const topM=Object.entries(mt).sort((a,b)=>b[1]-a[1]);
   if(topM.length){h+=`<div class="ins-card"><h4>💳 Métodos de pago</h4>`;topM.forEach(([mid,v])=>{const m=METHODS.find(x=>x.id===mid)||{e:'💵',n:mid};h+=`<div class="ins-row"><div class="il">${m.e} ${m.n}</div><div class="iv">${$(v)}</div></div>`});h+=`</div>`}
