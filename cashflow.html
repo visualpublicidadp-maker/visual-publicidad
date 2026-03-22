@@ -41,12 +41,13 @@
 /* ═══ LAYOUT: 3 rows — header, scroll, bottom ═══ */
 html{
 height:100%;
-background:var(–bg);
+background:#0C111B;
+color:#EEF2FA;
 }
 body{
 font-family:‘Plus Jakarta Sans’,-apple-system,sans-serif;
-background:var(–bg);
-color:var(–fg);
+background:#0C111B;
+color:#EEF2FA;
 height:100%;
 height:100dvh;
 display:flex;
@@ -673,7 +674,7 @@ pointer-events:none;
 <!-- ═══ JAVASCRIPT ═══ -->
 
 <script>
-const KEY='cfw_v8';
+const KEY='cashflow_data';
 const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const IP=4800000,GF=3756000,PV=IP-GF;
 
@@ -721,11 +722,20 @@ let pend=null, edId=null;
 
 // ═══ STORAGE ═══
 function ld(){
+  // Try current key first
   try{
     const s=localStorage.getItem(KEY);
-    if(s) D=JSON.parse(s);
+    if(s){D=JSON.parse(s);return}
   }catch(e){}
-  if(!D||!D.items) D={items:[],learned:{},streak:{last:'',count:0}};
+  // Migrate from any previous version
+  const oldKeys=['cfw_v8','cfw_v7','cfw_v6','cfw_v5','cfw_v4','cfw_v3','cfw_v2','cfw_v1'];
+  for(const k of oldKeys){
+    try{
+      const s=localStorage.getItem(k);
+      if(s){D=JSON.parse(s);sv();localStorage.removeItem(k);return}
+    }catch(e){}
+  }
+  D={items:[],learned:{},streak:{last:'',count:0}};
 }
 function sv(){localStorage.setItem(KEY,JSON.stringify(D))}
 
