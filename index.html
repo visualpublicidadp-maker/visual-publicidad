@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear Cuenta — Visual Publicidad</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0c10;color:#eef0f6;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#13151c;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;border:1px solid #272b3a}
+h1{font-size:1.3rem;font-weight:900;color:#f5c842;text-align:center;margin-bottom:6px}
+.sub{font-size:0.8rem;color:#9196ad;text-align:center;margin-bottom:28px}
+label{display:block;font-size:0.75rem;font-weight:700;color:#9196ad;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input{width:100%;background:#0b0c10;border:1.5px solid #272b3a;border-radius:10px;padding:14px;color:#eef0f6;font-size:16px;outline:none;margin-bottom:16px}
+input:focus{border-color:#f5c842}
+.btn{width:100%;background:#f5c842;color:#1a1a1a;border:none;border-radius:12px;padding:14px;font-size:1rem;font-weight:900;cursor:pointer}
+.btn:active{filter:brightness(0.9)}
+.btn-login{background:transparent;color:#9196ad;border:1px solid #272b3a;margin-top:10px;font-weight:700;font-size:0.9rem}
+.err{display:none;background:rgba(255,79,79,0.1);border:1px solid #ff4f4f;border-radius:10px;padding:12px;font-size:0.85rem;color:#ff4f4f;margin-bottom:14px}
+.ok{display:none;background:rgba(54,216,122,0.1);border:1px solid #36d87a;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
+.ok h2{color:#36d87a;font-size:1.1rem;margin-bottom:8px}
+.ok p{font-size:0.85rem;color:#9196ad;line-height:1.5}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+<div class="card">
+  <h1>🔐 Crear Cuenta Admin</h1>
+  <p class="sub">Visual Publicidad — Registro único</p>
+
+  <div class="ok" id="ok-msg">
+    <h2>✅ Cuenta creada</h2>
+    <p>Ya puedes entrar a la app con este email y contraseña.</p>
+  </div>
+
+  <div class="err" id="err-msg"></div>
+
+  <div id="form-wrap">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+
+```
+<label>Contraseña (mín. 6 caracteres)</label>
+<input type="password" id="pass" placeholder="••••••••">
+
+<label>Confirmar contraseña</label>
+<input type="password" id="pass2" placeholder="••••••••">
+
+<button class="btn" id="btn" onclick="crear()">Crear cuenta</button>
+```
+
+  </div>
+
+<button class="btn btn-login" onclick="window.location.href='index.html'">← Ir al login</button>
+
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCSoH8-Z55v8S3xYX5_HdVZvFfyu21bg44",
+  authDomain: "visual-publicidad.firebaseapp.com",
+  projectId: "visual-publicidad",
+  storageBucket: "visual-publicidad.firebasestorage.app",
+  messagingSenderId: "930738459395",
+  appId: "1:930738459395:web:525b32e8cd355e6b6b8f36"
+});
+
+var auth = firebase.auth();
+
+function crear(){
+  var email = document.getElementById('email').value.trim();
+  var pass = document.getElementById('pass').value;
+  var pass2 = document.getElementById('pass2').value;
+  var errEl = document.getElementById('err-msg');
+  var btn = document.getElementById('btn');
+
+  errEl.style.display='none';
+
+  if(!email||!pass){ show('Completa todos los campos'); return; }
+  if(pass.length<6){ show('La contraseña debe tener al menos 6 caracteres'); return; }
+  if(pass!==pass2){ show('Las contraseñas no coinciden'); return; }
+
+  btn.textContent='Creando...';
+  btn.disabled=true;
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(function(){
+      document.getElementById('ok-msg').style.display='block';
+      document.getElementById('form-wrap').style.display='none';
+    })
+    .catch(function(e){
+      var msgs = {
+        'auth/email-already-in-use': 'Este email ya tiene cuenta. Ve al login.',
+        'auth/weak-password': 'Contraseña muy débil (mín. 6 caracteres)',
+        'auth/invalid-email': 'Email inválido',
+        'auth/operation-not-allowed': 'Email/Password no está habilitado en Firebase. Ve a Firebase Console → Authentication → Sign-in method → Email/Password → Habilitar'
+      };
+      show(msgs[e.code] || 'Error ('+e.code+'): '+e.message);
+      btn.textContent='Crear cuenta';
+      btn.disabled=false;
+    });
+
+  function show(msg){ errEl.textContent=msg; errEl.style.display='block'; }
+}
+
+document.getElementById('pass2').addEventListener('keydown', function(e){
+  if(e.key==='Enter') crear();
+});
+</script>
+
+</body>
+</html>
